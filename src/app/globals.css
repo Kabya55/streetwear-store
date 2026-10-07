@@ -1,0 +1,272 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   THEME TOKENS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+:root,
+html.dark {
+  --bg-0: #0a0a0a;
+  --bg-1: #121212;
+  --bg-2: #181818;
+  --bg-3: #1e1e1e;
+  --border: #262626;
+  --border-muted: #3a3a3a;
+  --text-1: #f4f4f5;
+  --text-2: #a1a1aa;
+  --text-3: #71717a;
+  color-scheme: dark;
+}
+
+html.light {
+  --bg-0: #e8e8e8;
+  --bg-1: #f2f2f2;
+  --bg-2: #ffffff;
+  --bg-3: #ebebeb;
+  --border: #d4d4d4;
+  --border-muted: #c4c4c4;
+  --text-1: #0a0a0a;
+  --text-2: #525252;
+  --text-3: #a3a3a3;
+  color-scheme: light;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+html,
+body {
+  background-color: var(--bg-1);
+  color: var(--text-1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.25s ease;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LIGHT MODE — MASTER OVERRIDES 
+   Using Tailwind's own CSS variable system for reliable overrides
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Override Tailwind gradient CSS variables in light mode */
+html.light {
+  --tw-gradient-from: #f2f2f2;
+  --tw-gradient-to: #ebebeb;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+/* Named section overrides — bulletproof */
+html.light .theme-hero {
+  background: linear-gradient(to bottom, #f5f5f5, #eeeeee, #e8e8e8) !important;
+}
+
+html.light .theme-glow {
+  display: none !important;
+}
+
+html.light .theme-footer {
+  background-color: #e8e8e8 !important;
+  border-top-color: var(--border) !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LIGHT MODE — BACKGROUND COLORS (AGGRESSIVE)
+   Catch-all: any element with inline bg #121212 etc.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Use Tailwind @layer for maximum specificity */
+@layer utilities {
+
+  .light .bg-\[\#121212\],
+  .light .bg-\[\#141414\],
+  .light .bg-\[\#161616\],
+  .light .bg-\[\#0a0a0a\],
+  .light .bg-\[\#0d0d0d\],
+  html.light .bg-\[\#121212\],
+  html.light .bg-\[\#141414\],
+  html.light .bg-\[\#161616\],
+  html.light .bg-\[\#0a0a0a\],
+  html.light .bg-\[\#0d0d0d\] {
+    background-color: var(--bg-1) !important;
+    background-image: none !important;
+  }
+
+  .light .bg-\[\#181818\],
+  .light .bg-\[\#1a1a1a\],
+  .light .bg-\[\#1c1c1c\],
+  html.light .bg-\[\#181818\],
+  html.light .bg-\[\#1a1a1a\],
+  html.light .bg-\[\#1c1c1c\] {
+    background-color: var(--bg-2) !important;
+    background-image: none !important;
+  }
+
+  .light .bg-\[\#1e1e1e\] {
+    background-color: var(--bg-3) !important;
+    background-image: none !important;
+  }
+
+  .light .from-\[\#181818\] {
+    --tw-gradient-from: #f5f5f5 !important;
+  }
+
+  .light .via-\[\#121212\] {
+    --tw-gradient-via: #f0f0f0 !important;
+  }
+
+  .light .to-\[\#121212\] {
+    --tw-gradient-to: #ebebeb !important;
+  }
+
+  .light .from-\[\#121212\] {
+    --tw-gradient-from: #f2f2f2 !important;
+  }
+}
+
+/* Neutral background overrides */
+html.light .bg-neutral-950 {
+  background-color: var(--bg-0) !important;
+}
+
+html.light .bg-neutral-900 {
+  background-color: #e4e4e4 !important;
+}
+
+html.light .bg-neutral-800 {
+  background-color: #d4d4d4 !important;
+}
+
+html.light .bg-neutral-700 {
+  background-color: #c4c4c4 !important;
+}
+
+html.light .bg-black {
+  background-color: #f0f0f0 !important;
+}
+
+html.light .bg-neutral-900\/90 {
+  background-color: rgba(220, 220, 220, 0.9) !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LIGHT MODE — TEXT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+html.light .text-white {
+  color: var(--text-1) !important;
+}
+
+html.light .text-neutral-100 {
+  color: var(--text-1) !important;
+}
+
+html.light .text-neutral-200 {
+  color: #1a1a1a !important;
+}
+
+html.light .text-neutral-300 {
+  color: #2a2a2a !important;
+}
+
+html.light .text-neutral-400 {
+  color: var(--text-2) !important;
+}
+
+html.light .text-neutral-500 {
+  color: var(--text-3) !important;
+}
+
+html.light .text-neutral-600 {
+  color: #a3a3a3 !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LIGHT MODE — BORDERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+html.light .border-neutral-800 {
+  border-color: var(--border) !important;
+}
+
+html.light .border-neutral-700 {
+  border-color: var(--border-muted) !important;
+}
+
+html.light .border-neutral-900 {
+  border-color: #e0e0e0 !important;
+}
+
+html.light .divide-neutral-800>*+* {
+  border-color: var(--border) !important;
+}
+
+html.light .divide-neutral-900>*+* {
+  border-color: #e8e8e8 !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LIGHT MODE — NAVBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+html.light header {
+  background-color: rgba(242, 242, 242, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom-color: var(--border) !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LIGHT MODE — HOVER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+html.light .hover\:bg-neutral-900:hover {
+  background-color: #e4e4e4 !important;
+}
+
+html.light .hover\:bg-neutral-800:hover {
+  background-color: #d4d4d4 !important;
+}
+
+html.light .hover\:text-white:hover {
+  color: var(--text-1) !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LIGHT MODE — INPUTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+html.light input,
+html.light textarea,
+html.light select {
+  background-color: var(--bg-3) !important;
+  color: var(--text-1) !important;
+  border-color: var(--border) !important;
+}
+
+html.light ::placeholder {
+  color: #a3a3a3 !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCROLLBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #E50914;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SELECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+::selection {
+  background-color: #E50914;
+  color: #ffffff;
+}
