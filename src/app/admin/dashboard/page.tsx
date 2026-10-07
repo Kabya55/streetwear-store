@@ -485,7 +485,7 @@ export default function AdminDashboardPage() {
         </div>
 
         <button
-          onClick={fetchAdminData}
+          onClick={() => fetchAdminData()}
           className="flex items-center gap-2 px-4 py-2 bg-neutral-900 border border-neutral-700 hover:border-white text-xs font-mono text-neutral-300 hover:text-white uppercase transition"
         >
           <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh Telemetry
