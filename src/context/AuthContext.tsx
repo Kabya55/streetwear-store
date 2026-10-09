@@ -3,9 +3,10 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface User {
   id: string;
+  _id?: string;
   name: string;
   email: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'editor' | 'user';
   avatar?: string;
 }
 
@@ -53,6 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (data.user) {
             const userData: User = {
               id: data.user._id || data.user.id,
+              _id: data.user._id || data.user.id,
               name: data.user.name,
               email: data.user.email,
               role: data.user.role,
@@ -94,6 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.user) {
         const userData: User = {
           id: data.user.id || data.user._id,
+          _id: data.user._id || data.user.id,
           name: data.user.name,
           email: data.user.email,
           role: data.user.role,
@@ -127,6 +130,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.user) {
         const userData: User = {
           id: data.user.id || data.user._id,
+          _id: data.user._id || data.user.id,
           name: data.user.name,
           email: data.user.email,
           role: data.user.role,

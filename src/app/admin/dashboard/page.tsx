@@ -1062,7 +1062,7 @@ export default function AdminDashboardPage() {
                           </span>
                         </td>
                         <td className="p-4">
-                          {u._id === user?._id ? (
+                          {u._id === (user?._id || user?.id) ? (
                             <span className="text-[10px] font-mono text-neutral-600 italic">Cannot change own role</span>
                           ) : (
                             <select

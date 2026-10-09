@@ -48,13 +48,12 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
     const selectedSize = product.sizes && product.sizes.length > 0 ? product.sizes[0] : 'Standard';
     await addToCart({
-      productId,
+      product: productId,
       title: product.title,
       price: product.price,
-      size: selectedSize,
+      selectedSize,
       image: mainImage,
       quantity: 1,
-      stock: product.stock,
       deliveryCharge: product.deliveryCharge,
     });
     setAdded(true);
