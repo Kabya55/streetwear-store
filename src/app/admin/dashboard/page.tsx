@@ -8,6 +8,7 @@ import {
   ShoppingBag,
   CheckCircle,
   Clock,
+  XCircle,
   Plus,
   Trash2,
   RefreshCw,
@@ -44,6 +45,7 @@ export default function AdminDashboardPage() {
     pendingOrders: 0,
     totalPaid: 0,
     totalPendingAmount: 0,
+    totalCancelledAmount: 0,
   });
 
   // Orders, Users, Products Lists
@@ -349,8 +351,8 @@ export default function AdminDashboardPage() {
       const imageList = rawImages.includes(',')
         ? rawImages.split(',').map((u) => u.trim()).filter(Boolean)
         : rawImages
-        ? [rawImages]
-        : editingProduct.images || [];
+          ? [rawImages]
+          : editingProduct.images || [];
 
       const targetId = editingProduct._id || editingProduct.id;
       const finalCategory =
@@ -386,7 +388,7 @@ export default function AdminDashboardPage() {
           .then((catData) => {
             if (Array.isArray(catData)) setCategories(catData);
           })
-          .catch(() => {});
+          .catch(() => { });
         alert('Product details updated successfully in MongoDB catalog!');
       } else {
         const err = await res.json().catch(() => ({}));
@@ -412,8 +414,8 @@ export default function AdminDashboardPage() {
       const imageList = rawImages.includes(',')
         ? rawImages.split(',').map((u) => u.trim()).filter(Boolean)
         : rawImages
-        ? [rawImages]
-        : ['https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&q=80&w=900'];
+          ? [rawImages]
+          : ['https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&q=80&w=900'];
 
       const finalCategory =
         isCustomCategory && customCategoryInput.trim()
@@ -454,7 +456,7 @@ export default function AdminDashboardPage() {
           .then((catData) => {
             if (Array.isArray(catData)) setCategories(catData);
           })
-          .catch(() => {});
+          .catch(() => { });
         alert('Product published and saved to MongoDB catalog!');
       } else {
         const err = await res.json().catch(() => ({}));
@@ -575,8 +577,23 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* Timeframe pill selector buttons */}
-          <div className="flex items-center gap-1 p-1 bg-[#121212] border border-neutral-800 rounded-sm text-xs font-mono">
+          {/* Mobile & Small Device Dropdown (< md) */}
+          <div className="md:hidden w-full sm:w-auto">
+            <select
+              value={statsRange}
+              onChange={(e) => handleRangeChange(e.target.value as any)}
+              disabled={statsLoading}
+              className="w-full sm:w-56 bg-[#121212] border border-neutral-700 text-white px-3 py-2 text-xs font-mono font-bold rounded-sm outline-none focus:border-[#E50914] cursor-pointer"
+            >
+              <option value="weekly">Weekly (৭ দিন)</option>
+              <option value="monthly">Monthly (৩০ দিন)</option>
+              <option value="yearly">Yearly (১ বছর)</option>
+              <option value="total">Total (সর্বমোট)</option>
+            </select>
+          </div>
+
+          {/* Desktop & Tablet Pill Selector Buttons (>= md) */}
+          <div className="hidden md:flex items-center gap-1 p-1 bg-[#121212] border border-neutral-800 rounded-sm text-xs font-mono">
             {[
               { id: 'weekly', label: 'Weekly', sub: '৭ দিন' },
               { id: 'monthly', label: 'Monthly', sub: '৩০ দিন' },
@@ -587,17 +604,15 @@ export default function AdminDashboardPage() {
                 key={tab.id}
                 onClick={() => handleRangeChange(tab.id as any)}
                 disabled={statsLoading}
-                className={`px-3 py-1.5 rounded-sm transition flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider ${
-                  statsRange === tab.id
-                    ? 'bg-[#E50914] text-white shadow-md'
-                    : 'text-neutral-400 hover:text-white hover:bg-neutral-850'
-                }`}
+                className={`px-3 py-1.5 rounded-sm transition flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider ${statsRange === tab.id
+                  ? 'bg-[#E50914] text-white shadow-md'
+                  : 'text-neutral-400 hover:text-white hover:bg-neutral-850'
+                  }`}
               >
                 <span>{tab.label}</span>
                 <span
-                  className={`text-[10px] ${
-                    statsRange === tab.id ? 'text-white/80' : 'text-neutral-500'
-                  }`}
+                  className={`text-[10px] ${statsRange === tab.id ? 'text-white/80' : 'text-neutral-500'
+                    }`}
                 >
                   {tab.sub}
                 </span>
@@ -605,9 +620,8 @@ export default function AdminDashboardPage() {
             ))}
           </div>
         </div>
-
-        {/* 7 Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 relative">
+        {/* 8 Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 relative">
           {statsLoading && (
             <div className="absolute inset-0 bg-[#121212]/60 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-sm">
               <Loader2 className="animate-spin text-[#E50914]" size={26} />
@@ -615,58 +629,66 @@ export default function AdminDashboardPage() {
           )}
           {[
             {
-              label: statsRange === 'total' ? 'TOTAL SALES (BDT)' : `${statsRange.toUpperCase()} SALES (BDT)`,
-              val: `৳ ${stats.totalSales.toLocaleString()}`,
-              icon: <DollarSign className="text-emerald-500" size={20} />,
-            },
-            {
               label: statsRange === 'total' ? 'TOTAL USERS' : `NEW USERS (${statsRange.toUpperCase()})`,
               val: stats.totalUsers,
-              icon: <Users className="text-blue-500" size={20} />,
+              icon: <Users className="text-blue-500" size={18} />,
             },
             {
               label: statsRange === 'total' ? 'LIFETIME ORDERS' : `${statsRange.toUpperCase()} ORDERS`,
               val: stats.totalOrders,
-              icon: <ShoppingBag className="text-purple-500" size={20} />,
+              icon: <ShoppingBag className="text-purple-500" size={18} />,
             },
             {
               label: 'DELIVERED',
               val: stats.deliveredOrders,
-              icon: <CheckCircle className="text-emerald-400" size={20} />,
+              icon: <CheckCircle className="text-emerald-400" size={18} />,
             },
             {
               label: 'PENDING / PROCESSING',
               val: stats.pendingOrders,
-              icon: <Clock className="text-amber-500" size={20} />,
+              icon: <Clock className="text-amber-500" size={18} />,
             },
             {
               label: 'TOTAL PAID (৳)',
               val: `৳ ${(stats.totalPaid || 0).toLocaleString()}`,
-              icon: <CheckCircle className="text-green-400" size={20} />,
+              icon: <CheckCircle className="text-green-400" size={18} />,
               highlight: 'emerald',
             },
             {
               label: 'TOTAL PENDING (৳)',
               val: `৳ ${(stats.totalPendingAmount || 0).toLocaleString()}`,
-              icon: <Clock className="text-orange-400" size={20} />,
+              icon: <Clock className="text-orange-400" size={18} />,
               highlight: 'orange',
+            },
+            {
+              label: 'TOTAL CANCELLED (৳)',
+              val: `৳ ${(
+                (stats.totalCancelledAmount !== undefined
+                  ? stats.totalCancelledAmount
+                  : orders
+                    .filter((o) => o.deliveryStatus === 'Cancelled')
+                    .reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0)) || 0
+              ).toLocaleString()}`,
+              icon: <XCircle className="text-red-500" size={18} />,
+              highlight: 'red',
             },
           ].map((card, i) => (
             <div
               key={i}
-              className={`bg-[#181818] border p-5 rounded-sm flex items-center justify-between ${
-                (card as any).highlight === 'emerald'
-                  ? 'border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.08)]'
-                  : (card as any).highlight === 'orange'
+              className={`bg-[#181818] border p-4 rounded-sm flex items-center justify-between ${(card as any).highlight === 'emerald'
+                ? 'border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.08)]'
+                : (card as any).highlight === 'orange'
                   ? 'border-orange-500/40 shadow-[0_0_12px_rgba(249,115,22,0.08)]'
-                  : 'border-neutral-800'
-              }`}
+                  : (card as any).highlight === 'red'
+                    ? 'border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.08)]'
+                    : 'border-neutral-800'
+                }`}
             >
               <div>
                 <p className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">
                   {card.label}
                 </p>
-                <p className="text-xl font-black mt-1 text-white font-mono">{card.val}</p>
+                <p className="text-base sm:text-lg font-black mt-1 text-white font-mono break-all">{card.val}</p>
               </div>
               {card.icon}
             </div>
@@ -675,36 +697,42 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* 2. NAVIGATION TABS */}
-      <div className="flex space-x-3 border-b border-neutral-800 text-xs font-mono uppercase">
+      <div className="flex space-x-8 border-b border-neutral-300 dark:border-neutral-800 text-xs font-mono uppercase tracking-wider">
         <button
           onClick={() => setActiveTab('analytics')}
-          className={`pb-3 font-bold transition ${
-            activeTab === 'analytics'
-              ? 'border-b-2 border-[#E50914] text-white'
-              : 'text-neutral-500 hover:text-neutral-300'
-          }`}
+          className={`relative pb-3 text-xs tracking-wider transition-all duration-150 ${activeTab === 'analytics'
+            ? 'text-[#E50914] font-black tab-btn-active'
+            : 'text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white tab-btn-inactive font-bold'
+            }`}
         >
           Orders Queue ({orders.length})
+          {activeTab === 'analytics' && (
+            <span className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-[#E50914] shadow-[0_0_12px_rgba(229,9,20,1)] rounded-full animate-in fade-in" />
+          )}
         </button>
         <button
           onClick={() => setActiveTab('users')}
-          className={`pb-3 font-bold transition ${
-            activeTab === 'users'
-              ? 'border-b-2 border-[#E50914] text-white'
-              : 'text-neutral-500 hover:text-neutral-300'
-          }`}
+          className={`relative pb-3 text-xs tracking-wider transition-all duration-150 ${activeTab === 'users'
+            ? 'text-[#E50914] font-black tab-btn-active'
+            : 'text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white tab-btn-inactive font-bold'
+            }`}
         >
           User Registry ({users.length})
+          {activeTab === 'users' && (
+            <span className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-[#E50914] shadow-[0_0_12px_rgba(229,9,20,1)] rounded-full animate-in fade-in" />
+          )}
         </button>
         <button
           onClick={() => setActiveTab('products')}
-          className={`pb-3 font-bold transition ${
-            activeTab === 'products'
-              ? 'border-b-2 border-[#E50914] text-white'
-              : 'text-neutral-500 hover:text-neutral-300'
-          }`}
+          className={`relative pb-3 text-xs tracking-wider transition-all duration-150 ${activeTab === 'products'
+            ? 'text-[#E50914] font-black tab-btn-active'
+            : 'text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white tab-btn-inactive font-bold'
+            }`}
         >
           Product Management ({products.length})
+          {activeTab === 'products' && (
+            <span className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-[#E50914] shadow-[0_0_12px_rgba(229,9,20,1)] rounded-full animate-in fade-in" />
+          )}
         </button>
       </div>
 
@@ -742,75 +770,85 @@ export default function AdminDashboardPage() {
                     </td>
                   </tr>
                 ) : (
-                  paginatedOrders.map((o) => (
-                    <tr key={o._id} className="hover:bg-neutral-900/60 transition">
-                      <td className="p-4 font-bold text-neutral-300">{o.transactionId}</td>
-                      <td className="p-4">
-                        <div className="font-bold text-white font-sans">{o.shippingAddress?.fullName}</div>
-                        <div className="text-[11px] text-neutral-400">{o.shippingAddress?.phone}</div>
-                        <div className="text-[10px] text-neutral-500">
-                          {o.shippingAddress?.district}, {o.shippingAddress?.thana}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="space-y-1">
-                          {o.items?.map((item: any, i: number) => (
-                            <div key={i} className="text-[11px] text-neutral-300">
-                              • {item.title} (x{item.quantity}) - {item.selectedSize}
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="p-4 font-bold text-white">৳ {o.totalAmount?.toLocaleString()}</td>
-                      <td className="p-4">
-                        {o.deliveryStatus === 'Cancelled' ? (
-                          <span className="px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase text-center bg-neutral-700/40 text-neutral-400 border border-neutral-600/40">
-                            Cancelled
-                          </span>
-                        ) : (
-                          <div className="flex flex-col gap-1.5">
-                            <span
-                              className={`px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase text-center ${
-                                o.paymentStatus === 'Paid'
+                  paginatedOrders.map((o) => {
+                    const isCancelled = o.deliveryStatus === 'Cancelled';
+                    return (
+                      <tr
+                        key={o._id}
+                        className="transition-colors duration-150 hover:bg-blue-500/10 dark:hover:bg-neutral-800/60"
+                      >
+                        <td className="p-4 font-bold text-neutral-300">
+                          {o.transactionId}
+                        </td>
+                        <td className="p-4">
+                          <div className="font-bold font-sans text-white">
+                            {o.shippingAddress?.fullName}
+                          </div>
+                          <div className="text-[11px] text-neutral-400">{o.shippingAddress?.phone}</div>
+                          <div className="text-[10px] text-neutral-500">
+                            {o.shippingAddress?.district}, {o.shippingAddress?.thana}
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="space-y-1">
+                            {o.items?.map((item: any, i: number) => (
+                              <div key={i} className="text-[11px] text-neutral-300">
+                                • {item.title} (x{item.quantity}) - {item.selectedSize}
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="p-4 font-bold text-white">
+                          ৳ {o.totalAmount?.toLocaleString()}
+                        </td>
+                        <td className="p-4">
+                          {isCancelled ? (
+                            <span className="px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase text-center bg-neutral-800 text-neutral-400 border border-neutral-700 inline-block">
+                              CANCELLED
+                            </span>
+                          ) : (
+                            <div className="flex flex-col gap-1.5">
+                              <span
+                                className={`px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase text-center ${o.paymentStatus === 'Paid'
                                   ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                   : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                              }`}
-                            >
-                              {o.paymentStatus}
-                            </span>
-                            <button
-                              onClick={() =>
-                                handlePaymentStatusChange(
-                                  o._id,
-                                  o.paymentStatus === 'Paid' ? 'Pending' : 'Paid'
-                                )
-                              }
-                              className={`px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider transition ${
-                                o.paymentStatus === 'Paid'
+                                  }`}
+                              >
+                                {o.paymentStatus}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  handlePaymentStatusChange(
+                                    o._id,
+                                    o.paymentStatus === 'Paid' ? 'Pending' : 'Paid'
+                                  )
+                                }
+                                className={`px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider transition ${o.paymentStatus === 'Paid'
                                   ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
                                   : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25'
-                              }`}
-                            >
-                              → Mark {o.paymentStatus === 'Paid' ? 'Pending' : 'Paid'}
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                      <td className="p-4">
-                        <select
-                          value={o.deliveryStatus}
-                          onChange={(e) => handleStatusChange(o._id, e.target.value)}
-                          className="bg-[#121212] border border-neutral-700 px-3 py-1.5 text-xs text-white outline-none font-mono focus:border-[#E50914]"
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="Processing">Processing</option>
-                          <option value="Shipped">Shipped</option>
-                          <option value="Delivered">Delivered</option>
-                          <option value="Cancelled">Cancelled</option>
-                        </select>
-                      </td>
-                    </tr>
-                  ))
+                                  }`}
+                              >
+                                → Mark {o.paymentStatus === 'Paid' ? 'Pending' : 'Paid'}
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <select
+                            value={o.deliveryStatus}
+                            onChange={(e) => handleStatusChange(o._id, e.target.value)}
+                            className="px-3 py-1.5 text-xs outline-none font-mono rounded-sm transition bg-[#121212] border border-neutral-700 text-white focus:border-[#ff6b00]"
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="Processing">Processing</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
+                          </select>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -880,11 +918,10 @@ export default function AdminDashboardPage() {
                         )}
                         <button
                           onClick={() => setOrderPage(p)}
-                          className={`min-w-[28px] h-7 px-1.5 flex items-center justify-center rounded-sm text-[11px] font-bold transition ${
-                            orderPage === p
-                              ? 'bg-[#E50914] text-white border border-[#E50914] shadow-sm'
-                              : 'bg-[#181818] border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
-                          }`}
+                          className={`min-w-[28px] h-7 px-1.5 flex items-center justify-center rounded-sm text-[11px] font-black transition ${orderPage === p
+                            ? 'bg-[#ff6b00] text-white border border-[#ff6b00] shadow-md shadow-[#ff6b00]/30'
+                            : 'bg-[#181818] border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
+                            }`}
                         >
                           {p}
                         </button>
@@ -978,18 +1015,17 @@ export default function AdminDashboardPage() {
                     </tr>
                   ) : (
                     paginatedUsers.map((u) => (
-                      <tr key={u._id} className="hover:bg-neutral-900/60 transition">
+                      <tr key={u._id} className="hover:bg-blue-500/10 dark:hover:bg-neutral-800/60 transition-colors duration-150">
                         <td className="p-4 font-bold text-white font-sans">{u.name}</td>
                         <td className="p-4 text-neutral-400">{u.email}</td>
                         <td className="p-4">
                           <span
-                            className={`px-2.5 py-1 text-[10px] font-bold uppercase rounded-sm ${
-                              u.role === 'admin'
-                                ? 'bg-[#E50914]/20 text-[#E50914] border border-[#E50914]/40'
-                                : u.role === 'editor'
+                            className={`px-2.5 py-1 text-[10px] font-bold uppercase rounded-sm ${u.role === 'admin'
+                              ? 'bg-[#E50914]/20 text-[#E50914] border border-[#E50914]/40'
+                              : u.role === 'editor'
                                 ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40'
                                 : 'bg-neutral-800 text-neutral-300 border border-neutral-700'
-                            }`}
+                              }`}
                           >
                             {u.role}
                           </span>
@@ -1001,13 +1037,12 @@ export default function AdminDashboardPage() {
                             <select
                               value={u.role}
                               onChange={(e) => handleUpdateUserRole(u._id, e.target.value)}
-                              className={`bg-[#121212] border px-3 py-1.5 text-xs font-mono font-bold outline-none cursor-pointer transition rounded-sm ${
-                                u.role === 'admin'
-                                  ? 'border-[#E50914]/50 text-[#E50914] focus:border-[#E50914]'
-                                  : u.role === 'editor'
+                              className={`bg-[#121212] border px-3 py-1.5 text-xs font-mono font-bold outline-none cursor-pointer transition rounded-sm ${u.role === 'admin'
+                                ? 'border-[#E50914]/50 text-[#E50914] focus:border-[#E50914]'
+                                : u.role === 'editor'
                                   ? 'border-blue-500/50 text-blue-400 focus:border-blue-400'
                                   : 'border-neutral-700 text-neutral-300 focus:border-neutral-500'
-                              }`}
+                                }`}
                             >
                               <option value="admin">👑 Admin</option>
                               <option value="editor">✏️ Editor</option>
@@ -1088,11 +1123,10 @@ export default function AdminDashboardPage() {
                           )}
                           <button
                             onClick={() => setUserPage(p)}
-                            className={`min-w-[28px] h-7 px-1.5 flex items-center justify-center rounded-sm text-[11px] font-bold transition ${
-                              userPage === p
-                                ? 'bg-[#E50914] text-white border border-[#E50914] shadow-sm'
-                                : 'bg-[#181818] border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
-                            }`}
+                            className={`min-w-[28px] h-7 px-1.5 flex items-center justify-center rounded-sm text-[11px] font-black transition ${userPage === p
+                              ? 'bg-[#ff6b00] text-white border border-[#ff6b00] shadow-md shadow-[#ff6b00]/30'
+                              : 'bg-[#181818] border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
+                              }`}
                           >
                             {p}
                           </button>
@@ -1173,11 +1207,10 @@ export default function AdminDashboardPage() {
                       key={preset}
                       type="button"
                       onClick={() => setDeliveryChargeInput(String(preset))}
-                      className={`px-2.5 py-1 text-[10px] font-mono border rounded-sm transition cursor-pointer ${
-                        deliveryChargeInput === String(preset)
-                          ? 'border-[#E50914] text-white bg-[#E50914]/20 font-bold'
-                          : 'border-neutral-800 text-neutral-400 hover:border-neutral-600 hover:text-white'
-                      }`}
+                      className={`px-2.5 py-1 text-[10px] font-mono border rounded-sm transition cursor-pointer ${deliveryChargeInput === String(preset)
+                        ? 'border-[#E50914] text-white bg-[#E50914]/20 font-bold'
+                        : 'border-neutral-800 text-neutral-400 hover:border-neutral-600 hover:text-white'
+                        }`}
                     >
                       {preset === 0 ? 'FREE' : `৳${preset}`}
                     </button>

@@ -351,15 +351,16 @@ export default function CheckoutPage() {
           <button
             type="submit"
             disabled={loading || totalsLoading}
-            className="w-full py-5 bg-[#E50914] hover:bg-[#B80710] disabled:bg-neutral-800 text-white font-black uppercase tracking-widest text-sm transition flex items-center justify-center gap-3 shadow-[0_0_25px_rgba(229,9,20,0.35)]"
+            className="w-full py-5 bg-[#ff6b00]/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_8px_30px_rgba(255,107,0,0.4)] disabled:bg-neutral-800 !text-white text-white font-black uppercase tracking-widest text-sm rounded-full hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(255,107,0,0.55)] active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-3"
+            style={{ color: '#ffffff' }}
           >
             {loading ? (
               <>
-                <Loader2 className="animate-spin" size={18} /> CONNECTING TO SSLCOMMERZ...
+                <Loader2 className="animate-spin text-white" size={18} /> CONNECTING TO SSLCOMMERZ...
               </>
             ) : totalsLoading ? (
               <>
-                <Loader2 className="animate-spin" size={18} /> CALCULATING SERVER TOTAL...
+                <Loader2 className="animate-spin text-white" size={18} /> CALCULATING SERVER TOTAL...
               </>
             ) : (
               `PAY WITH SSLCOMMERZ (৳ ${grandTotal.toLocaleString()} BDT)`
@@ -376,7 +377,7 @@ export default function CheckoutPage() {
           <div className="space-y-4 max-h-80 overflow-y-auto pr-2 divide-y divide-neutral-900">
             {totalsLoading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="animate-spin text-[#E50914]" size={24} />
+                <Loader2 className="animate-spin text-[#1299e8]" size={24} />
                 <span className="ml-2 text-xs font-mono text-neutral-400">Verifying prices from server...</span>
               </div>
             ) : (
@@ -423,7 +424,7 @@ export default function CheckoutPage() {
             </div>
             <div className="border-t border-neutral-800 pt-3 flex justify-between text-sm font-black text-white">
               <span>PAYABLE AMOUNT:</span>
-              <span className="text-[#E50914] text-base">
+              <span className="text-[#1299e8] text-base">
                 {totalsLoading ? (
                   <Loader2 className="animate-spin inline" size={16} />
                 ) : (

@@ -20,7 +20,7 @@ export default function FeaturedProductsSection({ products }: FeaturedProductsSe
         </div>
         <Link
           href="/products"
-          className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white flex items-center gap-1 transition-colors"
+          className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-600 hover:text-[#1299e8] dark:text-neutral-400 dark:hover:text-[#1299e8] flex items-center gap-1 transition-colors"
         >
           Browse Full Vault <ArrowRight size={14} />
         </Link>

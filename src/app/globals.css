@@ -152,8 +152,57 @@ html.light .bg-neutral-900\/90 {
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    LIGHT MODE — TEXT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-html.light .text-white {
+html.light .text-white:not(button):not(button *):not(.always-white):not(.always-white *) {
   color: var(--text-1) !important;
+}
+
+/* Ensure active colored buttons and always-white elements retain pure white text */
+.always-white,
+.always-white * {
+  color: #ffffff !important;
+}
+
+html.light button.text-white,
+html.light button.text-white *,
+html.light a.text-white,
+html.light a.text-white *,
+html.light .btn-glass,
+html.light .btn-glass * {
+  color: #ffffff !important;
+}
+
+/* Tab active button matching top nav */
+.tab-btn-active,
+.tab-btn-active *,
+html.light .tab-btn-active,
+html.light .tab-btn-active *,
+html.light button.tab-btn-active,
+html.light button.tab-btn-active * {
+  color: #E50914 !important;
+}
+
+.tab-btn-inactive,
+.tab-btn-inactive *,
+html.light .tab-btn-inactive,
+html.light .tab-btn-inactive *,
+html.light button.tab-btn-inactive,
+html.light button.tab-btn-inactive * {
+  color: #737373 !important;
+}
+
+html.light .tab-btn-inactive:hover,
+html.light .tab-btn-inactive:hover *,
+html.light button.tab-btn-inactive:hover,
+html.light button.tab-btn-inactive:hover * {
+  color: #171717 !important;
+}
+
+/* Inactive buttons in light mode must have clear black text */
+html.light button:not(.text-white):not(.always-white):not(.tab-btn-active):not(.tab-btn-inactive):not([class*="text-[#E50914]"]):not([class*="text-red-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]) {
+  color: #0a0a0a !important;
+}
+html.light button:not(.text-white):not(.always-white):not(.tab-btn-active):not(.tab-btn-inactive):not([class*="text-[#E50914]"]):not([class*="text-red-"]):not([class*="text-emerald-"]):not([class*="text-amber-"]) * {
+  color: #0a0a0a !important;
 }
 
 html.light .text-neutral-100 {

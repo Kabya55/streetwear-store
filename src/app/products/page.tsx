@@ -359,7 +359,7 @@ function ProductsContent() {
                 className={`text-left text-xs uppercase font-mono px-3 py-2 rounded-sm transition flex items-center justify-between w-full ${
                   category === 'all'
                     ? 'bg-[#E50914] text-white font-bold shadow-sm'
-                    : 'text-neutral-700 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
+                    : 'text-neutral-900 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 font-semibold'
                 }`}
               >
                 <span>All Collections</span>
@@ -378,7 +378,7 @@ function ProductsContent() {
                     className={`text-left text-xs uppercase font-mono px-3 py-2 rounded-sm transition flex items-center justify-between w-full ${
                       isSelected
                         ? 'bg-[#E50914] text-white font-bold shadow-sm'
-                        : 'text-neutral-700 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
+                        : 'text-neutral-900 dark:text-neutral-300 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 font-semibold'
                     }`}
                   >
                     <span className="truncate pr-2">{cat.name || cat.slug}</span>
@@ -401,7 +401,7 @@ function ProductsContent() {
               className={`w-full flex items-center justify-between px-3 py-2 rounded-sm text-xs font-mono transition border ${
                 inStockOnly
                   ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold'
-                  : 'border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900'
+                  : 'border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900 font-semibold'
               }`}
             >
               <span className="flex items-center gap-2">
@@ -409,7 +409,7 @@ function ProductsContent() {
                   className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center ${
                     inStockOnly
                       ? 'bg-emerald-500 border-emerald-500 text-white'
-                      : 'border-neutral-400 dark:border-neutral-600'
+                      : 'border-neutral-500 dark:border-neutral-600'
                   }`}
                 >
                   {inStockOnly && <Check size={11} strokeWidth={3} />}
@@ -442,7 +442,7 @@ function ProductsContent() {
                   className={`py-1.5 text-[11px] font-mono uppercase text-center rounded-sm transition border ${
                     size === 'all'
                       ? 'bg-[#E50914] border-[#E50914] text-white font-bold'
-                      : 'border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600'
+                      : 'border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-neutral-300 hover:border-neutral-500 dark:hover:border-neutral-600 font-bold'
                   }`}
                 >
                   ALL
@@ -454,7 +454,7 @@ function ProductsContent() {
                     className={`py-1.5 text-[11px] font-mono uppercase text-center rounded-sm transition border ${
                       size === s
                         ? 'bg-[#E50914] border-[#E50914] text-white font-bold'
-                        : 'border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-400 hover:border-neutral-400 dark:hover:border-neutral-600'
+                        : 'border-neutral-300 dark:border-neutral-800 text-neutral-900 dark:text-neutral-300 hover:border-neutral-500 dark:hover:border-neutral-600 font-bold'
                     }`}
                   >
                     {s}
@@ -494,7 +494,8 @@ function ProductsContent() {
               </div>
               <button
                 type="submit"
-                className="w-full py-2 bg-neutral-900 dark:bg-neutral-800 hover:bg-[#E50914] text-white text-xs font-mono uppercase font-bold tracking-wider rounded-sm transition"
+                className="w-full py-2.5 bg-[#ff6b00]/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_4px_14px_rgba(255,107,0,0.35)] !text-white text-white text-xs font-mono uppercase font-bold tracking-wider rounded-full hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 transition-all duration-200"
+                style={{ color: '#ffffff' }}
               >
                 Apply Price Filter
               </button>
@@ -512,7 +513,7 @@ function ProductsContent() {
         <div className="lg:col-span-9">
           {loading ? (
             <div className="min-h-[400px] flex items-center justify-center">
-              <Loader2 className="animate-spin text-[#E50914]" size={36} />
+              <Loader2 className="animate-spin text-[#1299e8]" size={36} />
             </div>
           ) : products.length === 0 ? (
             <div className="min-h-[400px] flex flex-col items-center justify-center bg-white dark:bg-[#181818] border border-neutral-200 dark:border-neutral-800 p-12 text-center rounded-sm shadow-sm transition-colors">
@@ -524,7 +525,8 @@ function ProductsContent() {
               </p>
               <button
                 onClick={handleClearAllFilters}
-                className="mt-6 px-6 py-2.5 bg-[#E50914] hover:bg-[#B80710] text-white text-xs font-bold uppercase tracking-wider rounded-sm transition"
+                className="mt-6 px-7 py-2.5 bg-[#ff6b00]/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_4px_14px_rgba(255,107,0,0.35)] !text-white text-white text-xs font-bold uppercase tracking-wider rounded-full hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 transition-all duration-200"
+                style={{ color: '#ffffff' }}
               >
                 Reset All Filters
               </button>

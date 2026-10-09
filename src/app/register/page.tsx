@@ -124,9 +124,10 @@ function RegisterContent() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-[#E50914] hover:bg-[#B80710] disabled:bg-neutral-800 text-white font-bold uppercase tracking-wider text-xs transition flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(229,9,20,0.3)]"
+            className="w-full py-4 bg-[#ff6b00]/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_6px_20px_rgba(255,107,0,0.35)] disabled:bg-neutral-800 !text-white text-white font-bold uppercase tracking-wider text-xs rounded-full hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(255,107,0,0.5)] active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2"
+            style={{ color: '#ffffff' }}
           >
-            {loading ? <Loader2 className="animate-spin" size={16} /> : 'Create Account & Proceed'}
+            {loading ? <Loader2 className="animate-spin text-white" size={16} /> : 'Create Account & Proceed'}
           </button>
         </form>
 
@@ -134,7 +135,7 @@ function RegisterContent() {
           Already a member?{' '}
           <Link
             href={`/login?redirect=${encodeURIComponent(redirectUrl)}`}
-            className="text-white hover:text-[#E50914] font-bold underline transition"
+            className="text-white hover:text-[#1299e8] font-bold underline transition"
           >
             Sign In Here
           </Link>

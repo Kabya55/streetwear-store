@@ -36,7 +36,7 @@ export default function CategoriesSection() {
         </div>
         <Link
           href="/products"
-          className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white flex items-center gap-1 transition-colors"
+          className="text-xs font-mono font-bold uppercase tracking-widest text-neutral-600 hover:text-[#1299e8] dark:text-neutral-400 dark:hover:text-[#1299e8] flex items-center gap-1 transition-colors"
         >
           All Categories <ArrowRight size={14} />
         </Link>
@@ -47,16 +47,19 @@ export default function CategoriesSection() {
           <Link
             href={cat.link}
             key={idx}
-            className="group relative h-96 overflow-hidden rounded-sm border border-neutral-200 dark:border-neutral-800 shadow-sm hover:shadow-md transition-all"
+            className="group relative h-96 overflow-hidden rounded-sm border border-neutral-200 dark:border-neutral-800 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300"
           >
             <img
               src={cat.img}
               alt={cat.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80 dark:opacity-60 group-hover:opacity-100 dark:group-hover:opacity-85"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-8 flex flex-col justify-end">
-              <span className="text-[11px] text-[#E50914] font-mono tracking-widest">{cat.sub}</span>
-              <h3 className="text-3xl font-black tracking-tight text-white group-hover:translate-x-1 transition-transform">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent p-8 flex flex-col justify-end">
+              <span className="text-[11px] text-[#1299e8] font-mono tracking-widest">{cat.sub}</span>
+              <h3
+                className="text-3xl font-black tracking-tight always-white !text-white group-hover:translate-x-1 transition-all"
+                style={{ color: '#ffffff' }}
+              >
                 {cat.title}
               </h3>
             </div>

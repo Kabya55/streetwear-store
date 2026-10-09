@@ -94,7 +94,7 @@ export default function Navbar() {
           {/* Brand Logo */}
           <Link
             href="/"
-            className="text-2xl md:text-3xl font-black tracking-widest uppercase font-mono text-neutral-950 dark:text-white hover:text-[#E50914] dark:hover:text-[#E50914] transition"
+            className="text-2xl md:text-3xl font-black tracking-widest uppercase font-mono text-neutral-950 dark:text-white hover:text-[#1299e8] dark:hover:text-[#1299e8] transition"
           >
             MIRALOU<span className="text-[#E50914]">.</span>
           </Link>
@@ -110,7 +110,7 @@ export default function Navbar() {
                   className={`relative py-2 transition-all duration-150 ${
                     active
                       ? 'text-[#E50914] font-black'
-                      : 'text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white'
+                      : 'text-neutral-600 hover:text-[#1299e8] dark:text-neutral-400 dark:hover:text-[#1299e8]'
                   }`}
                 >
                   {item.label}
@@ -127,7 +127,7 @@ export default function Navbar() {
             {/* Search Toggle */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="hover:text-neutral-950 dark:hover:text-white transition"
+              className="hover:text-[#1299e8] dark:hover:text-[#1299e8] transition"
               title="Search store"
             >
               <Search size={20} />
@@ -137,7 +137,7 @@ export default function Navbar() {
             <button
               onClick={toggleTheme}
               title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              className="relative w-9 h-9 flex items-center justify-center rounded-full border border-neutral-300 dark:border-neutral-700 hover:border-[#E50914] bg-neutral-100 dark:bg-neutral-900/50 transition-all duration-300 group overflow-hidden"
+              className="relative w-9 h-9 flex items-center justify-center rounded-full border border-neutral-300 dark:border-neutral-700 hover:border-[#1299e8] bg-neutral-100 dark:bg-neutral-900/50 transition-all duration-300 group overflow-hidden"
               id="theme-toggle-btn"
             >
               {/* Dark mode icon */}
@@ -161,10 +161,10 @@ export default function Navbar() {
             </button>
 
             {/* Shopping Cart Bag */}
-            <Link href="/cart" className="relative hover:text-neutral-950 dark:hover:text-white transition group">
+            <Link href="/cart" className="relative hover:text-[#1299e8] dark:hover:text-[#1299e8] transition group">
               <ShoppingBag size={22} className="group-hover:scale-110 transition" />
               {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#E50914] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-[#121212]">
+                <span className="absolute -top-2 -right-2 bg-[#ff6b00] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-[#121212]">
                   {totalItems}
                 </span>
               )}
@@ -183,10 +183,10 @@ export default function Navbar() {
                     <img
                       src={user.avatar}
                       alt={user.name}
-                      className="w-8 h-8 rounded-full object-cover border border-neutral-300 dark:border-neutral-700 group-hover:border-[#E50914] transition"
+                      className="w-8 h-8 rounded-full object-cover border border-neutral-300 dark:border-neutral-700 group-hover:border-[#1299e8] transition"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 group-hover:border-[#E50914] text-neutral-900 dark:text-white font-black text-xs font-mono flex items-center justify-center transition">
+                    <div className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 group-hover:border-[#1299e8] text-neutral-900 dark:text-white font-black text-xs font-mono flex items-center justify-center transition">
                       {user.name.slice(0, 2).toUpperCase()}
                     </div>
                   )}
@@ -194,8 +194,8 @@ export default function Navbar() {
                   {/* Down Arrow for Admin (and general user menu) */}
                   <ChevronDown
                     size={15}
-                    className={`text-neutral-500 dark:text-neutral-400 group-hover:text-neutral-950 dark:group-hover:text-white transition-transform duration-200 ${
-                      userDropdownOpen ? 'rotate-180 text-[#E50914]' : ''
+                    className={`text-neutral-500 dark:text-neutral-400 group-hover:text-[#1299e8] transition-transform duration-200 ${
+                      userDropdownOpen ? 'rotate-180 text-[#1299e8]' : ''
                     }`}
                   />
                 </button>
@@ -211,7 +211,7 @@ export default function Navbar() {
                       </p>
                       <div className="mt-2">
                         {user.role === 'admin' ? (
-                          <span className="inline-block px-2 py-0.5 bg-[#E50914]/15 border border-[#E50914]/30 text-[#E50914] text-[10px] font-bold font-mono tracking-wider uppercase rounded-sm">
+                          <span className="inline-block px-2 py-0.5 bg-[#ff6b00]/15 border border-[#ff6b00]/30 text-[#ff6b00] text-[10px] font-bold font-mono tracking-wider uppercase rounded-sm">
                             ★ Store Administrator
                           </span>
                         ) : (
@@ -228,9 +228,10 @@ export default function Navbar() {
                         <Link
                           href="/admin/dashboard"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2.5 w-full px-3 py-2.5 bg-[#E50914] hover:bg-[#B80710] text-white text-xs font-bold font-mono uppercase tracking-wider rounded-sm transition"
+                          className="flex items-center gap-2.5 w-full px-4 py-2.5 bg-[#ff6b00]/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45)] !text-white text-white text-xs font-bold font-mono uppercase tracking-wider rounded-full hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 transition-all duration-200"
+                          style={{ color: '#ffffff' }}
                         >
-                          <LayoutDashboard size={15} /> Dashboard Console
+                          <LayoutDashboard size={15} className="text-white" /> Dashboard Console
                         </Link>
                       </div>
                     )}
@@ -251,7 +252,7 @@ export default function Navbar() {
               /* If Not Logged In: Sign In Button */
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 px-4 py-2 border border-neutral-300 dark:border-neutral-700 hover:border-neutral-950 dark:hover:border-white text-neutral-950 dark:text-white bg-white dark:bg-transparent text-xs font-mono font-bold uppercase tracking-wider transition"
+                className="inline-flex items-center gap-1.5 px-5 py-2 bg-white/20 dark:bg-white/10 backdrop-blur-md border border-neutral-300 dark:border-white/20 hover:border-[#1299e8] hover:text-[#1299e8] text-neutral-950 dark:text-white text-xs font-mono font-bold uppercase tracking-wider rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] hover:-translate-y-0.5 transition-all duration-200"
               >
                 <UserIcon size={14} /> Sign In
               </Link>
@@ -274,7 +275,8 @@ export default function Navbar() {
               />
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#E50914] hover:bg-[#B80710] text-white text-xs font-bold uppercase tracking-wider"
+                className="px-6 py-2 bg-[#ff6b00]/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_4px_14px_rgba(255,107,0,0.35)] !text-white text-white text-xs font-bold uppercase tracking-wider rounded-full hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 transition-all duration-200"
+                style={{ color: '#ffffff' }}
               >
                 Search
               </button>
@@ -294,8 +296,8 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`block text-sm font-bold uppercase tracking-wider py-2 transition rounded-sm ${
                     active
-                      ? 'text-[#E50914] font-black pl-3 border-l-2 border-[#E50914] bg-red-50 dark:bg-red-950/20'
-                      : 'text-neutral-700 hover:text-neutral-950 dark:text-neutral-300 dark:hover:text-white pl-3'
+                      ? 'text-[#1299e8] font-black pl-3 border-l-2 border-[#1299e8] bg-blue-50 dark:bg-blue-950/20'
+                      : 'text-neutral-700 hover:text-[#1299e8] dark:text-neutral-300 dark:hover:text-[#1299e8] pl-3'
                   }`}
                 >
                   {item.label}
@@ -310,7 +312,7 @@ export default function Navbar() {
                   <Link
                     href="/admin/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block text-sm font-bold uppercase tracking-wider text-[#E50914]"
+                    className="block text-sm font-bold uppercase tracking-wider text-[#ff6b00]"
                   >
                     ★ Admin Dashboard
                   </Link>
@@ -330,7 +332,8 @@ export default function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block text-center py-3 bg-[#E50914] text-white font-bold text-xs uppercase tracking-wider"
+                  className="block text-center py-3 bg-[#ff6b00]/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45)] !text-white text-white font-bold text-xs uppercase tracking-wider rounded-full hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200"
+                  style={{ color: '#ffffff' }}
                 >
                   Sign In / Register
                 </Link>

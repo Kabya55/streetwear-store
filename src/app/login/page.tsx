@@ -102,9 +102,9 @@ function LoginContent() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-[#E50914] hover:bg-[#B80710] disabled:bg-neutral-800 text-white font-bold uppercase tracking-wider text-xs transition flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(229,9,20,0.3)]"
+
           >
-            {loading ? <Loader2 className="animate-spin" size={16} /> : 'Authenticate Session'}
+
           </button>
         </form>
 
@@ -112,7 +112,7 @@ function LoginContent() {
           Don't have an account yet?{' '}
           <Link
             href={`/register?redirect=${encodeURIComponent(redirectUrl)}`}
-            className="text-white hover:text-[#E50914] font-bold underline transition"
+            className="text-white hover:text-[#1299e8] font-bold underline transition"
           >
             Register Here
           </Link>

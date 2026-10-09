@@ -20,7 +20,7 @@ export default function BrandStorySection() {
           <div className="pt-2">
             <Link
               href="/about"
-              className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-neutral-950 dark:text-white hover:text-[#E50914] dark:hover:text-[#E50914] transition-colors"
+              className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-neutral-950 dark:text-white hover:text-[#1299e8] dark:hover:text-[#1299e8] transition-colors"
             >
               Read The Full Manifesto <ArrowRight size={14} />
             </Link>
@@ -28,22 +28,22 @@ export default function BrandStorySection() {
         </div>
 
         <div className="lg:col-span-5 grid grid-cols-2 gap-4">
-          <div className="bg-neutral-50 dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 p-5 rounded-sm transition-colors">
+          <div className="bg-neutral-50 dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 p-5 rounded-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg">
             <Zap className="text-[#E50914] mb-2" size={24} />
             <h4 className="text-xs font-bold uppercase text-neutral-950 dark:text-white">48H DELIVERY</h4>
             <p className="text-[11px] text-neutral-600 dark:text-neutral-400 mt-1">Express dispatch nationwide in Bangladesh.</p>
           </div>
-          <div className="bg-neutral-50 dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 p-5 rounded-sm transition-colors">
+          <div className="bg-neutral-50 dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 p-5 rounded-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg">
             <ShieldCheck className="text-[#E50914] mb-2" size={24} />
             <h4 className="text-xs font-bold uppercase text-neutral-950 dark:text-white">100% AUTHENTIC</h4>
             <p className="text-[11px] text-neutral-600 dark:text-neutral-400 mt-1">Certified premium industrial grade materials.</p>
           </div>
-          <div className="bg-neutral-50 dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 p-5 rounded-sm transition-colors">
+          <div className="bg-neutral-50 dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 p-5 rounded-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg">
             <Sparkles className="text-[#E50914] mb-2" size={24} />
             <h4 className="text-xs font-bold uppercase text-neutral-950 dark:text-white">SSLCOMMERZ</h4>
             <p className="text-[11px] text-neutral-600 dark:text-neutral-400 mt-1">Encrypted bKash, Nagad & Card payment.</p>
           </div>
-          <div className="bg-neutral-50 dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 p-5 rounded-sm transition-colors">
+          <div className="bg-neutral-50 dark:bg-[#121212] border border-neutral-200 dark:border-neutral-800 p-5 rounded-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg">
             <Flame className="text-[#E50914] mb-2" size={24} />
             <h4 className="text-xs font-bold uppercase text-neutral-950 dark:text-white">LIMITED DROPS</h4>
             <p className="text-[11px] text-neutral-600 dark:text-neutral-400 mt-1">Numbered and small-batch production runs.</p>

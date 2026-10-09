@@ -119,7 +119,7 @@ export default function CartPage() {
         </div>
         <button
           onClick={clearCart}
-          className="text-xs font-mono text-neutral-400 hover:text-[#E50914] uppercase transition"
+          className="text-xs font-mono text-neutral-400 hover:text-[#1299e8] uppercase transition"
         >
           Clear Bag
         </button>
@@ -234,7 +234,7 @@ export default function CartPage() {
             </div>
             <div className="border-t border-neutral-800 pt-3 flex justify-between text-sm font-black text-white">
               <span>ESTIMATED TOTAL:</span>
-              <span className="text-[#E50914] text-base">৳ {grandTotal.toLocaleString()} BDT</span>
+              <span className="text-[#1299e8] text-base">৳ {grandTotal.toLocaleString()} BDT</span>
             </div>
           </div>
 
@@ -247,9 +247,10 @@ export default function CartPage() {
 
           <button
             onClick={handleProceedCheckout}
-            className="w-full py-4 bg-[#E50914] hover:bg-[#B80710] text-white font-black uppercase tracking-widest text-xs transition flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(229,9,20,0.3)] cursor-pointer"
+            className="w-full py-4 bg-[#ff6b00]/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_6px_20px_rgba(255,107,0,0.35)] !text-white text-white font-black uppercase tracking-widest text-xs rounded-full hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(255,107,0,0.5)] active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+            style={{ color: '#ffffff' }}
           >
-            {user ? 'Proceed to Checkout' : 'Sign In to Checkout'} <ArrowRight size={16} />
+            {user ? 'Proceed to Checkout' : 'Sign In to Checkout'} <ArrowRight size={16} className="text-white" />
           </button>
 
           <div className="text-[11px] font-mono text-neutral-400 text-center leading-relaxed">

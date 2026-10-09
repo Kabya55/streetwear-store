@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ShoppingBag, ArrowLeft, ShieldCheck, Zap, RotateCcw, Loader2, Lock } from 'lucide-react';
+import { ShoppingBag, ShoppingCart, ArrowLeft, ShieldCheck, Zap, RotateCcw, Loader2, Lock } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 
@@ -106,7 +106,7 @@ export default function ProductDetailPage() {
       {/* Back button */}
       <Link
         href="/products"
-        className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-neutral-400 hover:text-white transition"
+        className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-neutral-400 hover:text-[#1299e8] transition"
       >
         <ArrowLeft size={16} /> Back to Catalog
       </Link>
@@ -130,7 +130,7 @@ export default function ProductDetailPage() {
                   key={idx}
                   onClick={() => setSelectedImage(img)}
                   className={`w-20 h-20 flex-shrink-0 bg-[#181818] border rounded-sm overflow-hidden ${
-                    selectedImage === img ? 'border-[#E50914]' : 'border-neutral-800'
+                    selectedImage === img ? 'border-[#1299e8]' : 'border-neutral-800'
                   }`}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
@@ -143,14 +143,14 @@ export default function ProductDetailPage() {
         {/* Right: Product Details & Purchase Form */}
         <div className="lg:col-span-5 space-y-6">
           <div className="space-y-2">
-            <span className="text-xs font-mono font-bold text-[#E50914] tracking-widest uppercase">
+            <span className="text-xs font-mono font-bold text-[#1299e8] tracking-widest uppercase">
               {product.category} COLLECTION
             </span>
             <h1 className="text-3xl font-black uppercase tracking-tight text-white">
               {product.title}
             </h1>
             <div className="flex items-center gap-3 pt-2 flex-wrap">
-              <span className="text-2xl font-black font-mono text-white">
+              <span className="text-2xl font-black font-mono text-[#1299e8]">
                 ৳ {product.price.toLocaleString()} BDT
               </span>
               <span className="text-[11px] font-mono px-2.5 py-1 bg-neutral-900 border border-neutral-700 text-emerald-400 font-bold rounded-sm">
@@ -184,8 +184,8 @@ export default function ProductDetailPage() {
                   onClick={() => setSelectedSize(size)}
                   className={`py-3 text-xs font-mono font-bold rounded-sm border transition ${
                     selectedSize === size
-                      ? 'border-[#E50914] bg-[#E50914] text-white'
-                      : 'border-neutral-800 bg-[#181818] text-neutral-300 hover:border-neutral-600'
+                      ? 'border-[#ff6b00] bg-[#ff6b00] text-white font-bold'
+                      : 'border-neutral-300 dark:border-neutral-800 bg-neutral-100 dark:bg-[#181818] text-neutral-900 dark:text-neutral-300 hover:border-neutral-500 font-bold'
                   }`}
                 >
                   {size}
@@ -200,14 +200,14 @@ export default function ProductDetailPage() {
             <div className="inline-flex items-center border border-neutral-800 bg-[#181818]">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="px-4 py-2 text-white hover:text-[#E50914] transition"
+                className="px-4 py-2 text-white hover:text-[#1299e8] transition"
               >
                 -
               </button>
               <span className="px-4 py-2 font-mono text-sm text-white">{quantity}</span>
               <button
                 onClick={() => setQuantity(Math.min(product.stock || 10, quantity + 1))}
-                className="px-4 py-2 text-white hover:text-[#E50914] transition"
+                className="px-4 py-2 text-white hover:text-[#1299e8] transition"
               >
                 +
               </button>
@@ -226,16 +226,18 @@ export default function ProductDetailPage() {
             <button
               onClick={handleAddToCart}
               disabled={product.stock === 0}
-              className="w-full py-4 bg-neutral-900 border border-neutral-700 hover:border-white text-white font-black uppercase tracking-widest text-xs transition flex items-center justify-center gap-2"
+              className="w-full py-4 bg-[#1299e8]/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_6px_20px_rgba(18,153,232,0.35)] disabled:bg-neutral-800 disabled:text-neutral-500 !text-white text-white font-black uppercase tracking-widest text-xs rounded-full hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(18,153,232,0.5)] active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2"
+              style={{ color: '#ffffff' }}
             >
-              <ShoppingBag size={16} /> Add To Bag
+              <ShoppingCart size={16} className="text-white" /> Add to Cart
             </button>
             <button
               onClick={handleBuyNow}
               disabled={product.stock === 0}
-              className="w-full py-4 bg-[#E50914] hover:bg-[#B80710] disabled:bg-neutral-800 text-white font-black uppercase tracking-widest text-xs transition shadow-[0_0_20px_rgba(229,9,20,0.3)]"
+              className="w-full py-4 bg-[#ff6b00]/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_6px_20px_rgba(255,107,0,0.35)] disabled:bg-neutral-800 disabled:text-neutral-500 !text-white text-white font-black uppercase tracking-widest text-xs rounded-full hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(255,107,0,0.5)] active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2"
+              style={{ color: '#ffffff' }}
             >
-              Instant Checkout (৳ BDT)
+              <ShoppingBag size={16} className="text-white" /> Buy Now (৳ BDT)
             </button>
           </div>
 

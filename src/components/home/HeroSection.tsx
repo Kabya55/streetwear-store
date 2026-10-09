@@ -33,13 +33,14 @@ export default function HeroSection() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <Link
             href="/products"
-            className="w-full sm:w-auto px-9 py-4 bg-[#E50914] hover:bg-[#B80710] text-white font-bold text-xs tracking-widest uppercase transition flex items-center justify-center gap-2 group shadow-[0_0_30px_rgba(229,9,20,0.3)]"
+            className="w-full sm:w-auto px-9 py-4 bg-[#E50914]/90 backdrop-blur-md border border-white/30 !text-white text-white font-bold text-xs tracking-widest uppercase rounded-full flex items-center justify-center gap-2 group shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_8px_30px_rgba(229,9,20,0.4)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(229,9,20,0.55)] active:translate-y-0 transition-all duration-200"
+            style={{ color: '#ffffff' }}
           >
-            Enter The Vault <ArrowRight size={16} className="group-hover:translate-x-1 transition" />
+            Enter The Vault <ArrowRight size={16} className="group-hover:translate-x-1 transition text-white" />
           </Link>
           <Link
             href="/about"
-            className="w-full sm:w-auto px-9 py-4 border border-neutral-300 dark:border-neutral-700 hover:border-neutral-900 dark:hover:border-white text-neutral-900 dark:text-white bg-white/80 dark:bg-transparent backdrop-blur-sm font-bold text-xs tracking-widest uppercase transition shadow-sm"
+            className="w-full sm:w-auto px-9 py-4 border border-neutral-300/80 dark:border-white/20 text-neutral-900 dark:text-white bg-white/70 dark:bg-white/10 backdrop-blur-md font-bold text-xs tracking-widest uppercase rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_4px_15px_rgba(0,0,0,0.05)] hover:-translate-y-1 hover:shadow-lg active:translate-y-0 hover:text-[#1299e8] hover:border-[#1299e8] transition-all duration-200"
           >
             Our Philosophy
           </Link>

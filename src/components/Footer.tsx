@@ -22,7 +22,7 @@ export default function Footer() {
         <div className="md:col-span-5 space-y-4">
           <Link
             href="/"
-            className="text-2xl font-black tracking-widest uppercase font-mono text-neutral-950 dark:text-white inline-block hover:text-[#E50914] dark:hover:text-[#E50914] transition"
+            className="text-2xl font-black tracking-widest uppercase font-mono text-neutral-950 dark:text-white inline-block hover:text-[#1299e8] dark:hover:text-[#1299e8] transition"
           >
             MIRALOU<span className="text-[#E50914]">.</span>
           </Link>
@@ -31,7 +31,7 @@ export default function Footer() {
             industrial fabrics, bespoke soles, and brutalist minimalism. Designed for Dhaka, Tokyo, and beyond.
           </p>
           <div className="pt-2 flex items-center gap-2 text-xs text-neutral-600 dark:text-neutral-400 font-mono">
-            <ShieldCheck size={16} className="text-[#E50914]" />
+            <ShieldCheck size={16} className="text-[#1299e8]" />
             <span>OFFICIAL SSLCOMMERZ SECURED GATEWAY</span>
           </div>
         </div>
@@ -41,27 +41,27 @@ export default function Footer() {
           <h4 className="text-neutral-950 dark:text-white font-bold uppercase tracking-wider">NAVIGATE</h4>
           <ul className="space-y-2">
             <li>
-              <Link href="/products" className="text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white transition">
+              <Link href="/products" className="text-neutral-600 hover:text-[#1299e8] dark:text-neutral-400 dark:hover:text-[#1299e8] transition">
                 All Sneakers
               </Link>
             </li>
             <li>
-              <Link href="/products?category=men" className="text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white transition">
+              <Link href="/products?category=men" className="text-neutral-600 hover:text-[#1299e8] dark:text-neutral-400 dark:hover:text-[#1299e8] transition">
                 Men's Collection
               </Link>
             </li>
             <li>
-              <Link href="/products?category=women" className="text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white transition">
+              <Link href="/products?category=women" className="text-neutral-600 hover:text-[#1299e8] dark:text-neutral-400 dark:hover:text-[#1299e8] transition">
                 Women's Collection
               </Link>
             </li>
             <li>
-              <Link href="/products?category=kids" className="text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white transition">
+              <Link href="/products?category=kids" className="text-neutral-600 hover:text-[#1299e8] dark:text-neutral-400 dark:hover:text-[#1299e8] transition">
                 Junior Drops
               </Link>
             </li>
             <li>
-              <Link href="/about" className="text-neutral-600 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white transition">
+              <Link href="/about" className="text-neutral-600 hover:text-[#1299e8] dark:text-neutral-400 dark:hover:text-[#1299e8] transition">
                 Manifesto & Vision
               </Link>
             </li>
@@ -81,20 +81,21 @@ export default function Footer() {
               <Check size={16} /> YOU ARE ON THE GUESTLIST
             </div>
           ) : (
-            <form onSubmit={handleSubscribe} className="flex">
+            <form onSubmit={handleSubscribe} className="flex items-center gap-2">
               <input
                 type="email"
                 required
                 placeholder="YOUR EMAIL..."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-white dark:bg-[#181818] border border-neutral-300 dark:border-neutral-800 px-4 py-3 text-xs text-neutral-900 dark:text-white outline-none focus:border-[#E50914] font-mono placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
+                className="w-full bg-white dark:bg-[#181818] border border-neutral-300 dark:border-neutral-800 px-4 py-3 text-xs text-neutral-900 dark:text-white outline-none focus:border-[#1299e8] font-mono placeholder:text-neutral-400 dark:placeholder:text-neutral-600 rounded-full"
               />
               <button
                 type="submit"
-                className="bg-[#E50914] hover:bg-[#B80710] px-5 text-white transition flex items-center justify-center"
+                className="bg-[#ff6b00]/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_4px_14px_rgba(255,107,0,0.35)] !text-white text-white px-6 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 flex items-center justify-center rounded-full shrink-0"
+                style={{ color: '#ffffff' }}
               >
-                <ArrowRight size={16} />
+                <ArrowRight size={16} className="text-white" />
               </button>
             </form>
           )}
