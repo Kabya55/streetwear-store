@@ -3,75 +3,61 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  DollarSign,
-  Users,
   ShoppingBag,
   CheckCircle,
   Clock,
-  XCircle,
   Plus,
   Trash2,
   RefreshCw,
   Search,
-  AlertCircle,
-  SlidersHorizontal,
-  ShieldAlert,
   Loader2,
-  Eye,
   Pencil,
   X,
-  Truck,
-  Calendar,
+  Package,
+  ShieldAlert,
   ChevronLeft,
   ChevronRight,
   Filter,
-  Package,
+  Truck,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
-export default function AdminDashboardPage() {
+export default function EditorDashboardPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'analytics' | 'orders' | 'users' | 'products'>('analytics');
+  // Active Editor View: strictly Orders Queue and Product Management
+  const [activeTab, setActiveTab] = useState<'orders' | 'products'>('orders');
   const [loading, setLoading] = useState(true);
-
-  // Stats & Timeframe Range
-  const [statsRange, setStatsRange] = useState<'weekly' | 'monthly' | 'yearly' | 'total'>('total');
-  const [statsLoading, setStatsLoading] = useState(false);
-  const [stats, setStats] = useState({
-    totalSales: 0,
-    totalUsers: 0,
-    totalOrders: 0,
-    deliveredOrders: 0,
-    pendingOrders: 0,
-    totalPaid: 0,
-    totalPendingAmount: 0,
-    totalCancelledAmount: 0,
-  });
-
-  // Orders, Users, Products Lists
-  const [orders, setOrders] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
-
-  // Search & Orders Pagination state
-  const [orderSearch, setOrderSearch] = useState('');
-  const [orderPage, setOrderPage] = useState<number>(1);
-  const [ordersPerPage, setOrdersPerPage] = useState<number>(5);
-
-  // Search & Users Pagination state
-  const [userSearch, setUserSearch] = useState('');
-  const [userPage, setUserPage] = useState<number>(1);
-  const [usersPerPage, setUsersPerPage] = useState<number>(5);
 
   // Delivery Charge State (Saved to MongoDB)
   const [deliveryCharge, setDeliveryCharge] = useState<number>(120);
   const [deliveryChargeInput, setDeliveryChargeInput] = useState<string>('120');
   const [deliveryChargeLoading, setDeliveryChargeLoading] = useState(false);
   const [deliveryChargeMessage, setDeliveryChargeMessage] = useState('');
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
 
-  // Add Product Form State
+  // Orders and Products state
+  const [orders, setOrders] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+
+  // Search & Orders Pagination state
+  const [orderSearch, setOrderSearch] = useState('');
+  const [orderPage, setOrderPage] = useState<number>(1);
+  const [ordersPerPage, setOrdersPerPage] = useState<number>(5);
+
+  // Search & Product filters
+  const [productSearch, setProductSearch] = useState('');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
+  const [productPage, setProductPage] = useState<number>(1);
+  const [productsPerPage, setProductsPerPage] = useState<number>(8);
+
+  // Create Product Modal & Form state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
+  const [customCategoryInput, setCustomCategoryInput] = useState('');
   const [newProduct, setNewProduct] = useState({
     title: '',
     price: '',
@@ -81,31 +67,12 @@ export default function AdminDashboardPage() {
     description: '',
     deliveryCharge: '120',
   });
-  const [createLoading, setCreateLoading] = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
 
-  // Product Search, Filter & Pagination
-  const [productSearch, setProductSearch] = useState('');
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
-  const [productPage, setProductPage] = useState<number>(1);
-  const [productsPerPage, setProductsPerPage] = useState<number>(8);
-
-  // Dynamic categories fetched from database
-  const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string }>>([
-    { id: 'men', name: 'Men Footwear', slug: 'men' },
-    { id: 'women', name: 'Women Footwear', slug: 'women' },
-    { id: 'kids', name: 'Junior / Kids', slug: 'kids' },
-  ]);
-  const [isCustomCategory, setIsCustomCategory] = useState(false);
-  const [customCategoryInput, setCustomCategoryInput] = useState('');
-
-  // Custom category state for edit modal
+  // Edit Product Modal & Form state
+  const [editingProduct, setEditingProduct] = useState<any | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
   const [isEditCustomCategory, setIsEditCustomCategory] = useState(false);
   const [editCustomCategoryInput, setEditCustomCategoryInput] = useState('');
-
-  // Edit Product Modal State
-  const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({
     title: '',
     price: '',
@@ -113,57 +80,31 @@ export default function AdminDashboardPage() {
     stock: '',
     images: '',
     description: '',
-    deliveryCharge: '',
+    deliveryCharge: '120',
   });
-  const [editLoading, setEditLoading] = useState(false);
 
-  // Delete Product Confirmation Modal State
+  // Delete Product Confirmation state
   const [deletingProduct, setDeletingProduct] = useState<any | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-  // Redirect if not admin
-  useEffect(() => {
-    if (!authLoading && (!user || user.role !== 'admin')) {
-      const timer = setTimeout(() => {
-        router.push('/login?redirect=/admin/dashboard&notice=admin_required');
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [user, authLoading, router]);
-
-  // Reset order pagination when search query or page size changes
-  useEffect(() => {
-    setOrderPage(1);
-  }, [orderSearch, ordersPerPage]);
-
-  // Reset user pagination when search query or page size changes
-  useEffect(() => {
-    setUserPage(1);
-  }, [userSearch, usersPerPage]);
-
-  const fetchAdminData = async (rangeOverride?: 'weekly' | 'monthly' | 'yearly' | 'total') => {
-    if (!user || user.role !== 'admin') return;
+  // Fetch Editor Data (Orders, Products, Categories)
+  const fetchEditorData = async () => {
     setLoading(true);
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('miralou_token') : null;
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const activeRange = rangeOverride || statsRange;
-      const [statsRes, ordersRes, usersRes, prodsRes, settingsRes, categoriesRes] = await Promise.all([
-        fetch(`${apiUrl}/admin/stats?range=${activeRange}`, { credentials: 'include', headers }),
+      const [ordersRes, prodsRes, categoriesRes, settingsRes] = await Promise.all([
         fetch(`${apiUrl}/admin/orders`, { credentials: 'include', headers }),
-        fetch(`${apiUrl}/admin/users`, { credentials: 'include', headers }),
-        fetch(`${apiUrl}/products`),
-        fetch(`${apiUrl}/settings`),
-        fetch(`${apiUrl}/products/categories`),
+        fetch(`${apiUrl}/products?limit=500`, { cache: 'no-store' }),
+        fetch(`${apiUrl}/products/categories`, { cache: 'no-store' }),
+        fetch(`${apiUrl}/settings`, { cache: 'no-store' }),
       ]);
 
-      if (statsRes.ok) setStats(await statsRes.json());
       if (ordersRes.ok) setOrders(await ordersRes.json());
-      if (usersRes.ok) setUsers(await usersRes.json());
       if (prodsRes.ok) setProducts(await prodsRes.json());
       if (categoriesRes.ok) {
         const catData = await categoriesRes.json();
@@ -179,42 +120,52 @@ export default function AdminDashboardPage() {
         }
       }
     } catch (err) {
-      console.error('Admin data fetch error', err);
+      console.error('Editor data fetch error', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Instant timeframe switcher for stats
-  const handleRangeChange = async (range: 'weekly' | 'monthly' | 'yearly' | 'total') => {
-    setStatsRange(range);
-    setStatsLoading(true);
+  // Update Store Delivery Charge
+  const handleUpdateDeliveryCharge = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDeliveryChargeLoading(true);
+    setDeliveryChargeMessage('');
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('miralou_token') : null;
-      const headers: Record<string, string> = {};
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch(`${apiUrl}/admin/stats?range=${range}`, { credentials: 'include', headers });
+      const res = await fetch(`${apiUrl}/settings`, {
+        method: 'PATCH',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify({ deliveryCharge: Number(deliveryChargeInput) }),
+      });
+
       if (res.ok) {
         const data = await res.json();
-        setStats(data);
+        const updated = Number(data.deliveryCharge);
+        setDeliveryCharge(updated);
+        setDeliveryChargeInput(String(updated));
+        setDeliveryChargeMessage(`Delivery fee updated to ৳ ${updated} BDT successfully!`);
+        setTimeout(() => setDeliveryChargeMessage(''), 3500);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.message || 'Failed to update delivery fee');
       }
-    } catch (err) {
-      console.error('Range stats error', err);
+    } catch (err: any) {
+      alert(err.message || 'Server error updating delivery charge');
     } finally {
-      setStatsLoading(false);
+      setDeliveryChargeLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!authLoading && user) {
-      if (user.role === 'admin') {
-        fetchAdminData();
-      } else if (user.role === 'editor') {
-        router.push('/editor/dashboard');
-      }
+    if (!authLoading && user && (user.role === 'editor' || user.role === 'admin')) {
+      fetchEditorData();
     }
-  }, [authLoading, user, router]);
+  }, [authLoading, user]);
 
   // Update order delivery status
   const handleStatusChange = async (orderId: string, newStatus: string) => {
@@ -233,10 +184,9 @@ export default function AdminDashboardPage() {
         setOrders((prev) =>
           prev.map((o) => (o._id === orderId ? { ...o, deliveryStatus: newStatus } : o))
         );
-        fetchAdminData();
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.message || 'Could not update delivery status in MongoDB');
+        alert(err.message || 'Could not update delivery status in database');
       }
     } catch (err) {
       alert('Error updating delivery status');
@@ -260,7 +210,6 @@ export default function AdminDashboardPage() {
         setOrders((prev) =>
           prev.map((o) => (o._id === orderId ? { ...o, paymentStatus: newStatus } : o))
         );
-        fetchAdminData();
       } else {
         const err = await res.json().catch(() => ({}));
         alert(err.message || 'Could not update payment status');
@@ -270,88 +219,21 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Update a user's role (admin / editor / user)
-  const handleUpdateUserRole = async (userId: string, newRole: string) => {
-    try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('miralou_token') : null;
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      const res = await fetch(`${apiUrl}/admin/users/${userId}/role`, {
-        method: 'PATCH',
-        headers,
-        credentials: 'include',
-        body: JSON.stringify({ role: newRole }),
-      });
-      if (res.ok) {
-        setUsers((prev) =>
-          prev.map((u) => (u._id === userId ? { ...u, role: newRole } : u))
-        );
-      } else {
-        const err = await res.json().catch(() => ({}));
-        alert(err.message || 'Could not update user role');
-      }
-    } catch (err) {
-      alert('Error updating user role');
-    }
-  };
-
-  // Update store-wide delivery charge in MongoDB
-  const handleUpdateDeliveryCharge = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const chargeVal = Number(deliveryChargeInput);
-    if (isNaN(chargeVal) || chargeVal < 0) {
-      alert('Please enter a valid non-negative delivery charge.');
-      return;
-    }
-
-    setDeliveryChargeLoading(true);
-    setDeliveryChargeMessage('');
-    try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('miralou_token') : null;
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      const res = await fetch(`${apiUrl}/settings`, {
-        method: 'PATCH',
-        headers,
-        credentials: 'include',
-        body: JSON.stringify({ deliveryCharge: chargeVal }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const updatedVal = Number(data.deliveryCharge ?? chargeVal);
-        setDeliveryCharge(updatedVal);
-        setDeliveryChargeInput(String(updatedVal));
-        setDeliveryChargeMessage('Delivery charge saved & updated successfully in MongoDB!');
-        setTimeout(() => setDeliveryChargeMessage(''), 4000);
-      } else {
-        const err = await res.json().catch(() => ({}));
-        alert(err.message || 'Failed to update delivery charge in database');
-      }
-    } catch (err) {
-      alert('Network error while updating delivery charge');
-    } finally {
-      setDeliveryChargeLoading(false);
-    }
-  };
-
-  // Start editing a product
+  // Start editing product
   const handleStartEdit = (product: any) => {
     setEditingProduct(product);
     setEditForm({
       title: product.title || '',
       price: String(product.price ?? ''),
       category: product.category || 'men',
-      stock: String(product.stock ?? ''),
+      stock: String(product.stock ?? '50'),
       images: Array.isArray(product.images) ? product.images.join(', ') : (product.images || ''),
       description: product.description || '',
-      deliveryCharge: String(product.deliveryCharge ?? deliveryCharge ?? 120),
+      deliveryCharge: String(product.deliveryCharge ?? 120),
     });
   };
 
-  // Save product edits to MongoDB
+  // Save edited product
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
@@ -385,7 +267,7 @@ export default function AdminDashboardPage() {
           stock: Number(editForm.stock),
           images: imageList,
           description: editForm.description.trim(),
-          deliveryCharge: editForm.deliveryCharge ? Number(editForm.deliveryCharge) : deliveryCharge,
+          deliveryCharge: Number(editForm.deliveryCharge) || 120,
         }),
       });
 
@@ -397,13 +279,7 @@ export default function AdminDashboardPage() {
         setEditingProduct(null);
         setIsEditCustomCategory(false);
         setEditCustomCategoryInput('');
-        fetch(`${apiUrl}/products/categories`)
-          .then((r) => r.json())
-          .then((catData) => {
-            if (Array.isArray(catData)) setCategories(catData);
-          })
-          .catch(() => { });
-        alert('Product details updated successfully in MongoDB catalog!');
+        alert('Product details updated successfully in catalog!');
       } else {
         const err = await res.json().catch(() => ({}));
         alert(err.message || 'Failed to update product');
@@ -447,7 +323,7 @@ export default function AdminDashboardPage() {
           stock: Number(newProduct.stock),
           images: imageList,
           description: newProduct.description.trim(),
-          deliveryCharge: newProduct.deliveryCharge ? Number(newProduct.deliveryCharge) : deliveryCharge,
+          deliveryCharge: Number(newProduct.deliveryCharge) || 120,
         }),
       });
 
@@ -466,13 +342,7 @@ export default function AdminDashboardPage() {
         setShowCreateModal(false);
         setIsCustomCategory(false);
         setCustomCategoryInput('');
-        fetch(`${apiUrl}/products/categories`)
-          .then((r) => r.json())
-          .then((catData) => {
-            if (Array.isArray(catData)) setCategories(catData);
-          })
-          .catch(() => { });
-        alert('Product published and saved to MongoDB catalog!');
+        alert('New product published successfully to catalog!');
       } else {
         const err = await res.json().catch(() => ({}));
         alert(err.message || 'Product creation failed');
@@ -484,7 +354,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Confirm and delete product from MongoDB
+  // Delete product
   const handleConfirmDelete = async () => {
     if (!deletingProduct) return;
     setDeleteLoading(true);
@@ -513,12 +383,12 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Filtered Orders
   const filteredOrders = orders.filter(
     (o) =>
       o.transactionId?.toLowerCase().includes(orderSearch.toLowerCase()) ||
       o.shippingAddress?.fullName?.toLowerCase().includes(orderSearch.toLowerCase())
   );
-
   const totalOrderPages = Math.ceil(filteredOrders.length / ordersPerPage) || 1;
   const paginatedOrders = filteredOrders.slice(
     (orderPage - 1) * ordersPerPage,
@@ -541,6 +411,10 @@ export default function AdminDashboardPage() {
     productPage * productsPerPage
   );
 
+  // Orders summary stats
+  const pendingCount = orders.filter((o) => ['Pending', 'Processing'].includes(o.deliveryStatus)).length;
+  const deliveredCount = orders.filter((o) => o.deliveryStatus === 'Delivered').length;
+
   if (authLoading) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center">
@@ -549,7 +423,8 @@ export default function AdminDashboardPage() {
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  // Access control: only editor and admin roles allowed
+  if (!user || (user.role !== 'editor' && user.role !== 'admin')) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center space-y-4">
         <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-full text-red-500">
@@ -557,208 +432,110 @@ export default function AdminDashboardPage() {
         </div>
         <h1 className="text-2xl font-black uppercase text-white tracking-tight">ACCESS RESTRICTED</h1>
         <p className="text-xs font-mono text-neutral-400 max-w-sm">
-          You must be authenticated with Administrator security clearance to access this executive console.
+          You must be authenticated with Editor or Admin security clearance to access this console.
         </p>
         <Link
-          href="/login?redirect=/admin/dashboard"
-          className="px-6 py-3 bg-[#E50914] hover:bg-[#B80710] text-white text-xs font-bold uppercase tracking-wider transition"
+          href="/login?redirect=/editor/dashboard"
+          className="px-6 py-3 bg-[#E50914] hover:bg-[#B80710] text-white text-xs font-bold uppercase tracking-wider transition rounded-sm"
         >
-          Sign In as Admin
+          Sign In
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10 space-y-10">
+    <div className="max-w-7xl mx-auto px-6 py-10 space-y-8">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-800 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-200 dark:border-neutral-800 pb-6">
         <div>
-          <span className="text-xs font-mono font-bold text-[#E50914] tracking-widest uppercase">
-            EXECUTIVE CONTROL PANEL
-          </span>
-          <h1 className="text-3xl font-black uppercase tracking-tight text-white mt-1">
-            MIRALOU ADMIN SUITE
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider bg-blue-500/15 border border-blue-500/30 text-blue-400 rounded-sm">
+              ✏️ Editor Console
+            </span>
+            <span className="text-xs font-mono text-neutral-500 dark:text-neutral-400">
+              Orders Queue & Product Management
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-neutral-900 dark:text-white mt-1">
+            MIRALOU EDITOR SUITE
           </h1>
         </div>
 
         <button
-          onClick={() => fetchAdminData()}
-          className="flex items-center gap-2 px-4 py-2 bg-neutral-900 border border-neutral-700 hover:border-white text-xs font-mono text-neutral-300 hover:text-white uppercase transition"
+          onClick={() => fetchEditorData()}
+          className="flex items-center gap-2 px-4 py-2 bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 hover:border-black dark:hover:border-white text-xs font-mono text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white uppercase transition rounded-sm"
         >
           <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh Telemetry
         </button>
       </div>
 
-      {/* 1. OVERVIEW ANALYTICS CARDS WITH TIMEFRAME SELECTOR */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#181818] border border-neutral-800 p-3.5 rounded-sm">
-          <div className="flex items-center gap-2.5 text-xs font-mono">
-            <div className="p-1.5 bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/20 rounded-sm">
-              <Calendar size={15} />
-            </div>
-            <div>
-              <span className="font-bold text-white uppercase tracking-wider">Metrics Timeframe:</span>
-              <span className="text-neutral-400 text-[11px] ml-2">
-                {statsRange === 'weekly' && 'Last 7 Days (এই সপ্তাহ)'}
-                {statsRange === 'monthly' && 'Last 30 Days (এই মাস)'}
-                {statsRange === 'yearly' && 'Last 365 Days (এই বছর)'}
-                {statsRange === 'total' && 'All-Time Lifetime Records (সর্বমোট)'}
-              </span>
+      {/* Editor Metric Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="bg-[#181818] border border-neutral-800 p-4 rounded-sm flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center justify-between gap-1 w-full">
+            <p className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">LIFETIME ORDERS</p>
+            <div className="p-1 rounded-full bg-white/5 text-purple-400">
+              <ShoppingBag size={18} />
             </div>
           </div>
-
-          {/* Mobile & Small Device Dropdown (< md) */}
-          <div className="md:hidden w-full sm:w-auto">
-            <select
-              value={statsRange}
-              onChange={(e) => handleRangeChange(e.target.value as any)}
-              disabled={statsLoading}
-              className="w-full sm:w-56 bg-[#121212] border border-neutral-700 text-white px-3 py-2 text-xs font-mono font-bold rounded-sm outline-none focus:border-[#E50914] cursor-pointer"
-            >
-              <option value="weekly">Weekly (৭ দিন)</option>
-              <option value="monthly">Monthly (৩০ দিন)</option>
-              <option value="yearly">Yearly (১ বছর)</option>
-              <option value="total">Total (সর্বমোট)</option>
-            </select>
-          </div>
-
-          {/* Desktop & Tablet Pill Selector Buttons (>= md) */}
-          <div className="hidden md:flex items-center gap-1 p-1 bg-[#121212] border border-neutral-800 rounded-sm text-xs font-mono">
-            {[
-              { id: 'weekly', label: 'Weekly', sub: '৭ দিন' },
-              { id: 'monthly', label: 'Monthly', sub: '৩০ দিন' },
-              { id: 'yearly', label: 'Yearly', sub: '১ বছর' },
-              { id: 'total', label: 'Total', sub: 'সর্বমোট' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleRangeChange(tab.id as any)}
-                disabled={statsLoading}
-                className={`px-3 py-1.5 rounded-sm transition flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider ${statsRange === tab.id
-                  ? 'bg-[#E50914] text-white shadow-md'
-                  : 'text-neutral-400 hover:text-white hover:bg-neutral-850'
-                  }`}
-              >
-                <span>{tab.label}</span>
-                <span
-                  className={`text-[10px] ${statsRange === tab.id ? 'text-white/80' : 'text-neutral-500'
-                    }`}
-                >
-                  {tab.sub}
-                </span>
-              </button>
-            ))}
-          </div>
+          <p className="text-xl font-black mt-2 text-white font-mono">{orders.length}</p>
         </div>
-        {/* 8 Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 relative">
-          {statsLoading && (
-            <div className="absolute inset-0 bg-[#121212]/60 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-sm">
-              <Loader2 className="animate-spin text-[#E50914]" size={26} />
+
+        <div className="bg-[#181818] border border-neutral-800 p-4 rounded-sm flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center justify-between gap-1 w-full">
+            <p className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">PENDING / PROCESSING</p>
+            <div className="p-1 rounded-full bg-white/5 text-amber-400">
+              <Clock size={18} />
             </div>
-          )}
-          {[
-            {
-              label: statsRange === 'total' ? 'TOTAL USERS' : `NEW USERS (${statsRange.toUpperCase()})`,
-              val: stats.totalUsers,
-              icon: <Users className="text-blue-500" size={18} />,
-            },
-            {
-              label: statsRange === 'total' ? 'LIFETIME ORDERS' : `${statsRange.toUpperCase()} ORDERS`,
-              val: stats.totalOrders,
-              icon: <ShoppingBag className="text-purple-500" size={18} />,
-            },
-            {
-              label: 'DELIVERED',
-              val: stats.deliveredOrders,
-              icon: <CheckCircle className="text-emerald-400" size={18} />,
-            },
-            {
-              label: 'PENDING / PROCESSING',
-              val: stats.pendingOrders,
-              icon: <Clock className="text-amber-500" size={18} />,
-            },
-            {
-              label: 'TOTAL PAID (৳)',
-              val: `৳ ${(stats.totalPaid || 0).toLocaleString()}`,
-              icon: <CheckCircle className="text-green-400" size={18} />,
-              highlight: 'emerald',
-            },
-            {
-              label: 'TOTAL PENDING (৳)',
-              val: `৳ ${(stats.totalPendingAmount || 0).toLocaleString()}`,
-              icon: <Clock className="text-orange-400" size={18} />,
-              highlight: 'orange',
-            },
-            {
-              label: 'TOTAL CANCELLED (৳)',
-              val: `৳ ${(
-                (stats.totalCancelledAmount !== undefined
-                  ? stats.totalCancelledAmount
-                  : orders
-                    .filter((o) => o.deliveryStatus === 'Cancelled')
-                    .reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0)) || 0
-              ).toLocaleString()}`,
-              icon: <XCircle className="text-red-500" size={18} />,
-              highlight: 'red',
-            },
-          ].map((card, i) => (
-            <div
-              key={i}
-              className={`bg-[#181818] border p-4 rounded-sm flex items-center justify-between ${(card as any).highlight === 'emerald'
-                ? 'border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.08)]'
-                : (card as any).highlight === 'orange'
-                  ? 'border-orange-500/40 shadow-[0_0_12px_rgba(249,115,22,0.08)]'
-                  : (card as any).highlight === 'red'
-                    ? 'border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.08)]'
-                    : 'border-neutral-800'
-                }`}
-            >
-              <div>
-                <p className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">
-                  {card.label}
-                </p>
-                <p className="text-base sm:text-lg font-black mt-1 text-white font-mono break-all">{card.val}</p>
-              </div>
-              {card.icon}
+          </div>
+          <p className="text-xl font-black mt-2 text-white font-mono">{pendingCount}</p>
+        </div>
+
+        <div className="bg-[#181818] border border-neutral-800 p-4 rounded-sm flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center justify-between gap-1 w-full">
+            <p className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">DELIVERED ORDERS</p>
+            <div className="p-1 rounded-full bg-white/5 text-emerald-400">
+              <CheckCircle size={18} />
             </div>
-          ))}
+          </div>
+          <p className="text-xl font-black mt-2 text-white font-mono">{deliveredCount}</p>
+        </div>
+
+        <div className="bg-[#181818] border border-neutral-800 p-4 rounded-sm flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+          <div className="flex items-center justify-between gap-1 w-full">
+            <p className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">CATALOG PRODUCTS</p>
+            <div className="p-1 rounded-full bg-white/5 text-blue-400">
+              <Package size={18} />
+            </div>
+          </div>
+          <p className="text-xl font-black mt-2 text-white font-mono">{products.length}</p>
         </div>
       </div>
 
-      {/* 2. NAVIGATION TABS */}
+      {/* Navigation Tabs (Orders Queue & Product Management only) */}
       <div className="flex space-x-8 border-b border-neutral-300 dark:border-neutral-800 text-xs font-mono uppercase tracking-wider">
         <button
-          onClick={() => setActiveTab('analytics')}
-          className={`relative pb-3 text-xs tracking-wider transition-all duration-150 ${activeTab === 'analytics'
-            ? 'text-[#E50914] font-black tab-btn-active'
-            : 'text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white tab-btn-inactive font-bold'
-            }`}
+          onClick={() => setActiveTab('orders')}
+          className={`relative pb-3 text-xs tracking-wider transition-all duration-150 ${
+            activeTab === 'orders'
+              ? 'text-[#E50914] font-black tab-btn-active'
+              : 'text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white tab-btn-inactive font-bold'
+          }`}
         >
           Orders Queue ({orders.length})
-          {activeTab === 'analytics' && (
+          {activeTab === 'orders' && (
             <span className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-[#E50914] shadow-[0_0_12px_rgba(229,9,20,1)] rounded-full animate-in fade-in" />
           )}
         </button>
-        <button
-          onClick={() => setActiveTab('users')}
-          className={`relative pb-3 text-xs tracking-wider transition-all duration-150 ${activeTab === 'users'
-            ? 'text-[#E50914] font-black tab-btn-active'
-            : 'text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white tab-btn-inactive font-bold'
-            }`}
-        >
-          User Registry ({users.length})
-          {activeTab === 'users' && (
-            <span className="absolute -bottom-[1px] left-0 right-0 h-[2.5px] bg-[#E50914] shadow-[0_0_12px_rgba(229,9,20,1)] rounded-full animate-in fade-in" />
-          )}
-        </button>
+
         <button
           onClick={() => setActiveTab('products')}
-          className={`relative pb-3 text-xs tracking-wider transition-all duration-150 ${activeTab === 'products'
-            ? 'text-[#E50914] font-black tab-btn-active'
-            : 'text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white tab-btn-inactive font-bold'
-            }`}
+          className={`relative pb-3 text-xs tracking-wider transition-all duration-150 ${
+            activeTab === 'products'
+              ? 'text-[#E50914] font-black tab-btn-active'
+              : 'text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white tab-btn-inactive font-bold'
+          }`}
         >
           Product Management ({products.length})
           {activeTab === 'products' && (
@@ -767,16 +544,19 @@ export default function AdminDashboardPage() {
         </button>
       </div>
 
-      {/* 3. ORDER MANAGEMENT TABLE */}
-      {activeTab === 'analytics' && (
+      {/* 1. ORDERS QUEUE VIEW */}
+      {activeTab === 'orders' && (
         <div className="space-y-4">
-          <div className="flex items-center gap-3 bg-[#181818] border border-neutral-800 p-3 max-w-md">
+          <div className="flex items-center gap-3 bg-[#181818] border border-neutral-800 p-3 max-w-md rounded-sm">
             <Search size={16} className="text-neutral-500" />
             <input
               type="text"
               placeholder="Filter by Transaction ID or Customer Name..."
               value={orderSearch}
-              onChange={(e) => setOrderSearch(e.target.value)}
+              onChange={(e) => {
+                setOrderSearch(e.target.value);
+                setOrderPage(1);
+              }}
               className="w-full bg-transparent border-none text-xs text-white outline-none font-mono placeholder:text-neutral-600"
             />
           </div>
@@ -840,10 +620,11 @@ export default function AdminDashboardPage() {
                           ) : (
                             <div className="flex flex-col gap-1.5">
                               <span
-                                className={`px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase text-center ${o.paymentStatus === 'Paid'
-                                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                  : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                                  }`}
+                                className={`px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase text-center ${
+                                  o.paymentStatus === 'Paid'
+                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                    : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                }`}
                               >
                                 {o.paymentStatus}
                               </span>
@@ -854,10 +635,11 @@ export default function AdminDashboardPage() {
                                     o.paymentStatus === 'Paid' ? 'Pending' : 'Paid'
                                   )
                                 }
-                                className={`px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider transition ${o.paymentStatus === 'Paid'
-                                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
-                                  : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25'
-                                  }`}
+                                className={`px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider transition ${
+                                  o.paymentStatus === 'Paid'
+                                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
+                                    : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25'
+                                }`}
                               >
                                 → Mark {o.paymentStatus === 'Paid' ? 'Pending' : 'Paid'}
                               </button>
@@ -884,9 +666,8 @@ export default function AdminDashboardPage() {
               </tbody>
             </table>
 
-            {/* ORDERS TABLE PAGINATION BAR */}
+            {/* Pagination Bar */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3.5 bg-[#121212] border-t border-neutral-800 text-xs font-mono">
-              {/* Left: showing count & page size selector */}
               <div className="flex items-center gap-3 text-neutral-400">
                 <span>
                   Showing{' '}
@@ -904,7 +685,10 @@ export default function AdminDashboardPage() {
                   <span className="text-neutral-400">Per page:</span>
                   <select
                     value={ordersPerPage}
-                    onChange={(e) => setOrdersPerPage(Number(e.target.value))}
+                    onChange={(e) => {
+                      setOrdersPerPage(Number(e.target.value));
+                      setOrderPage(1);
+                    }}
                     className="bg-[#181818] border border-neutral-700 text-white px-2 py-1 rounded-sm outline-none focus:border-[#E50914] cursor-pointer"
                   >
                     <option value={5}>5</option>
@@ -915,63 +699,45 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Right: navigation buttons & numbers */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <button
                   onClick={() => setOrderPage(1)}
                   disabled={orderPage === 1}
-                  className="px-2.5 py-1.5 bg-[#181818] border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed transition rounded-sm text-[11px] font-bold"
-                  title="First Page"
+                  className="px-2 py-1 bg-[#181818] border border-neutral-800 text-neutral-400 hover:text-white disabled:opacity-30 rounded-sm"
                 >
                   « First
                 </button>
                 <button
-                  onClick={() => setOrderPage((p) => Math.max(p - 1, 1))}
+                  onClick={() => setOrderPage((p) => Math.max(1, p - 1))}
                   disabled={orderPage === 1}
-                  className="px-3 py-1.5 bg-[#181818] border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed transition rounded-sm text-[11px] font-bold flex items-center gap-1"
+                  className="px-2 py-1 bg-[#181818] border border-neutral-800 text-neutral-400 hover:text-white disabled:opacity-30 rounded-sm"
                 >
-                  <ChevronLeft size={13} /> Prev
+                  ‹ Prev
                 </button>
-
-                {/* Page number buttons */}
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalOrderPages }, (_, i) => i + 1)
-                    .filter(
-                      (p) =>
-                        p === 1 ||
-                        p === totalOrderPages ||
-                        Math.abs(p - orderPage) <= 1
-                    )
-                    .map((p, idx, arr) => (
-                      <div key={p} className="flex items-center">
-                        {idx > 0 && arr[idx - 1] !== p - 1 && (
-                          <span className="px-1 text-neutral-500">...</span>
-                        )}
-                        <button
-                          onClick={() => setOrderPage(p)}
-                          className={`min-w-[28px] h-7 px-1.5 flex items-center justify-center rounded-sm text-[11px] font-black transition ${orderPage === p
-                            ? 'bg-[#ff6b00] text-white border border-[#ff6b00] shadow-md shadow-[#ff6b00]/30'
-                            : 'bg-[#181818] border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
-                            }`}
-                        >
-                          {p}
-                        </button>
-                      </div>
-                    ))}
-                </div>
-
+                {Array.from({ length: totalOrderPages }, (_, i) => i + 1).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setOrderPage(p)}
+                    className={`min-w-[28px] h-7 px-1.5 flex items-center justify-center rounded-sm text-[11px] font-black transition ${
+                      orderPage === p
+                        ? 'bg-[#ff6b00] text-white border border-[#ff6b00] shadow-md shadow-[#ff6b00]/30'
+                        : 'bg-[#181818] border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
                 <button
-                  onClick={() => setOrderPage((p) => Math.min(p + 1, totalOrderPages))}
+                  onClick={() => setOrderPage((p) => Math.min(totalOrderPages, p + 1))}
                   disabled={orderPage === totalOrderPages}
-                  className="px-3 py-1.5 bg-[#181818] border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed transition rounded-sm text-[11px] font-bold flex items-center gap-1"
+                  className="px-2 py-1 bg-[#181818] border border-neutral-800 text-neutral-400 hover:text-white disabled:opacity-30 rounded-sm"
                 >
-                  Next <ChevronRight size={13} />
+                  Next ›
                 </button>
                 <button
                   onClick={() => setOrderPage(totalOrderPages)}
                   disabled={orderPage === totalOrderPages}
-                  className="px-2.5 py-1.5 bg-[#181818] border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed transition rounded-sm text-[11px] font-bold"
-                  title="Last Page"
+                  className="px-2 py-1 bg-[#181818] border border-neutral-800 text-neutral-400 hover:text-white disabled:opacity-30 rounded-sm"
                 >
                   Last »
                 </button>
@@ -981,215 +747,9 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* 4. USER MANAGEMENT TABLE */}
-      {activeTab === 'users' && (() => {
-        const filteredUsers = users.filter(
-          (u) =>
-            u.name?.toLowerCase().includes(userSearch.toLowerCase()) ||
-            u.email?.toLowerCase().includes(userSearch.toLowerCase())
-        );
-        const totalUserPages = Math.ceil(filteredUsers.length / usersPerPage) || 1;
-        const paginatedUsers = filteredUsers.slice(
-          (userPage - 1) * usersPerPage,
-          userPage * usersPerPage
-        );
-        return (
-          <div className="space-y-4">
-            {/* Search Bar */}
-            <div className="flex items-center gap-3 bg-[#181818] border border-neutral-800 p-3 max-w-md">
-              <Search size={16} className="text-neutral-500" />
-              <input
-                type="text"
-                placeholder="Search by Name or Email Address..."
-                value={userSearch}
-                onChange={(e) => setUserSearch(e.target.value)}
-                className="w-full bg-transparent border-none text-xs text-white outline-none font-mono placeholder:text-neutral-600"
-              />
-              {userSearch && (
-                <button onClick={() => setUserSearch('')} className="text-neutral-500 hover:text-white transition">
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-
-            <div className="bg-[#181818] border border-neutral-800 rounded-sm overflow-x-auto">
-              {/* Table Header Info */}
-              <div className="px-5 py-3.5 border-b border-neutral-800 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider">User Registry</p>
-                  <p className="text-xs font-bold text-white mt-0.5">
-                    {filteredUsers.length} {userSearch ? 'matching' : 'registered'} member{filteredUsers.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
-                <span className="text-[10px] font-mono text-neutral-500 bg-[#121212] border border-neutral-800 px-2.5 py-1 rounded-sm">
-                  Role changes save to MongoDB instantly
-                </span>
-              </div>
-
-              <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-[#121212] text-neutral-400 uppercase border-b border-neutral-800">
-                  <tr>
-                    <th className="p-4">User Name</th>
-                    <th className="p-4">Email Address</th>
-                    <th className="p-4">Security Role</th>
-                    <th className="p-4">Change Role</th>
-                    <th className="p-4">Orders Placed</th>
-                    <th className="p-4">Member Since</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-800">
-                  {filteredUsers.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="p-8 text-center text-neutral-500">
-                        No users match the search query.
-                      </td>
-                    </tr>
-                  ) : (
-                    paginatedUsers.map((u) => (
-                      <tr key={u._id} className="hover:bg-blue-500/10 dark:hover:bg-neutral-800/60 transition-colors duration-150">
-                        <td className="p-4 font-bold text-white font-sans">{u.name}</td>
-                        <td className="p-4 text-neutral-400">{u.email}</td>
-                        <td className="p-4">
-                          <span
-                            className={`px-2.5 py-1 text-[10px] font-bold uppercase rounded-sm ${u.role === 'admin'
-                              ? 'bg-[#E50914]/20 text-[#E50914] border border-[#E50914]/40'
-                              : u.role === 'editor'
-                                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40'
-                                : 'bg-neutral-800 text-neutral-300 border border-neutral-700'
-                              }`}
-                          >
-                            {u.role}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          {u._id === user?._id ? (
-                            <span className="text-[10px] font-mono text-neutral-600 italic">Cannot change own role</span>
-                          ) : (
-                            <select
-                              value={u.role}
-                              onChange={(e) => handleUpdateUserRole(u._id, e.target.value)}
-                              className={`bg-[#121212] border px-3 py-1.5 text-xs font-mono font-bold outline-none cursor-pointer transition rounded-sm ${u.role === 'admin'
-                                ? 'border-[#E50914]/50 text-[#E50914] focus:border-[#E50914]'
-                                : u.role === 'editor'
-                                  ? 'border-blue-500/50 text-blue-400 focus:border-blue-400'
-                                  : 'border-neutral-700 text-neutral-300 focus:border-neutral-500'
-                                }`}
-                            >
-                              <option value="admin">👑 Admin</option>
-                              <option value="editor">✏️ Editor</option>
-                              <option value="user">👤 User</option>
-                            </select>
-                          )}
-                        </td>
-                        <td className="p-4 font-bold text-white">{u.ordersCount || 0} Orders</td>
-                        <td className="p-4 text-neutral-500">
-                          {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-
-              {/* USERS PAGINATION BAR */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3.5 bg-[#121212] border-t border-neutral-800 text-xs font-mono">
-                {/* Left: showing count & page size */}
-                <div className="flex items-center gap-3 text-neutral-400">
-                  <span>
-                    Showing{' '}
-                    <strong className="text-white">
-                      {filteredUsers.length === 0 ? 0 : (userPage - 1) * usersPerPage + 1}
-                    </strong>{' '}
-                    to{' '}
-                    <strong className="text-white">
-                      {Math.min(userPage * usersPerPage, filteredUsers.length)}
-                    </strong>{' '}
-                    of <strong className="text-[#E50914]">{filteredUsers.length}</strong> users
-                  </span>
-                  <span className="text-neutral-600">|</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-neutral-400">Per page:</span>
-                    <select
-                      value={usersPerPage}
-                      onChange={(e) => setUsersPerPage(Number(e.target.value))}
-                      className="bg-[#181818] border border-neutral-700 text-white px-2 py-1 rounded-sm outline-none focus:border-[#E50914] cursor-pointer"
-                    >
-                      <option value={5}>5</option>
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={50}>50</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Right: page navigation */}
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setUserPage(1)}
-                    disabled={userPage === 1}
-                    className="px-2.5 py-1.5 bg-[#181818] border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed transition rounded-sm text-[11px] font-bold"
-                  >
-                    « First
-                  </button>
-                  <button
-                    onClick={() => setUserPage((p) => Math.max(p - 1, 1))}
-                    disabled={userPage === 1}
-                    className="px-3 py-1.5 bg-[#181818] border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed transition rounded-sm text-[11px] font-bold flex items-center gap-1"
-                  >
-                    <ChevronLeft size={13} /> Prev
-                  </button>
-
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: totalUserPages }, (_, i) => i + 1)
-                      .filter(
-                        (p) =>
-                          p === 1 ||
-                          p === totalUserPages ||
-                          Math.abs(p - userPage) <= 1
-                      )
-                      .map((p, idx, arr) => (
-                        <div key={p} className="flex items-center">
-                          {idx > 0 && arr[idx - 1] !== p - 1 && (
-                            <span className="px-1 text-neutral-500">...</span>
-                          )}
-                          <button
-                            onClick={() => setUserPage(p)}
-                            className={`min-w-[28px] h-7 px-1.5 flex items-center justify-center rounded-sm text-[11px] font-black transition ${userPage === p
-                              ? 'bg-[#ff6b00] text-white border border-[#ff6b00] shadow-md shadow-[#ff6b00]/30'
-                              : 'bg-[#181818] border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
-                              }`}
-                          >
-                            {p}
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-
-                  <button
-                    onClick={() => setUserPage((p) => Math.min(p + 1, totalUserPages))}
-                    disabled={userPage === totalUserPages}
-                    className="px-3 py-1.5 bg-[#181818] border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed transition rounded-sm text-[11px] font-bold flex items-center gap-1"
-                  >
-                    Next <ChevronRight size={13} />
-                  </button>
-                  <button
-                    onClick={() => setUserPage(totalUserPages)}
-                    disabled={userPage === totalUserPages}
-                    className="px-2.5 py-1.5 bg-[#181818] border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed transition rounded-sm text-[11px] font-bold"
-                  >
-                    Last »
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* 5. PRODUCT MANAGEMENT & PUBLISHING */}
+      {/* 2. PRODUCT MANAGEMENT VIEW */}
       {activeTab === 'products' && (
         <div className="space-y-6">
-          {/* Product Management Toolbar (Search, Filter, Delivery Fee & Deploy New Drop) */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#181818] border border-neutral-800 p-4 rounded-sm">
             <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
               {/* Search Product */}
@@ -1223,8 +783,8 @@ export default function AdminDashboardPage() {
                   <option value="women">WOMEN</option>
                   <option value="kids">KIDS</option>
                   {categories.map((c) => (
-                    <option key={c.id || c.slug} value={c.slug || c.id}>
-                      {(c.name || c.slug).toUpperCase()}
+                    <option key={c._id || c.name} value={c.name}>
+                      {c.name.toUpperCase()}
                     </option>
                   ))}
                 </select>
@@ -1269,7 +829,7 @@ export default function AdminDashboardPage() {
                           <img
                             src={firstImg || 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=100'}
                             alt={p.title}
-                            className="w-12 h-12 object-cover rounded-sm border border-neutral-700 shrink-0 bg-neutral-900"
+                            className="w-12 h-12 object-cover rounded-sm border border-neutral-700 shrink-0"
                           />
                           <div>
                             <p className="font-bold font-sans text-white text-sm line-clamp-1">{p.title}</p>
@@ -1295,24 +855,14 @@ export default function AdminDashboardPage() {
                         </td>
                         <td className="p-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Link
-                              href={`/products/${p._id || p.id}`}
-                              target="_blank"
-                              className="p-1.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-sm transition"
-                              title="View product in store"
-                            >
-                              <Eye size={15} />
-                            </Link>
                             <button
-                              type="button"
                               onClick={() => handleStartEdit(p)}
-                              className="p-1.5 text-neutral-400 hover:text-amber-400 hover:bg-neutral-800 rounded-sm transition"
+                              className="p-1.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-sm transition"
                               title="Edit Drop"
                             >
                               <Pencil size={15} />
                             </button>
                             <button
-                              type="button"
                               onClick={() => setDeletingProduct(p)}
                               className="p-1.5 text-neutral-400 hover:text-red-500 hover:bg-neutral-800 rounded-sm transition"
                               title="Delete Drop"
@@ -1400,7 +950,7 @@ export default function AdminDashboardPage() {
 
             <form onSubmit={handleCreateProduct} className="space-y-4 text-xs font-mono">
               <div>
-                <label className="block text-neutral-400 uppercase mb-1">Product Title *</label>
+                <label className="block text-neutral-400 uppercase mb-1">Product Title</label>
                 <input
                   type="text"
                   required
@@ -1468,7 +1018,7 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <label className="block text-neutral-400 uppercase mb-1">Category *</label>
+                <label className="block text-neutral-400 uppercase mb-1">Category</label>
                 {!isCustomCategory ? (
                   <div className="flex gap-2">
                     <select
@@ -1486,11 +1036,11 @@ export default function AdminDashboardPage() {
                       <option value="women">WOMEN</option>
                       <option value="kids">KIDS</option>
                       {categories.map((c) => (
-                        <option key={c.id || c.slug} value={c.slug || c.id}>
-                          {(c.name || c.slug).toUpperCase()}
+                        <option key={c._id || c.name} value={c.name}>
+                          {c.name.toUpperCase()}
                         </option>
                       ))}
-                      <option value="__custom__" className="text-[#E50914] font-bold">+ Enter Custom Category...</option>
+                      <option value="__custom__">+ Enter Custom Category...</option>
                     </select>
                   </div>
                 ) : (
@@ -1514,10 +1064,9 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <label className="block text-neutral-400 uppercase mb-1">Image URLs (comma-separated) *</label>
+                <label className="block text-neutral-400 uppercase mb-1">Image URLs (comma-separated)</label>
                 <textarea
                   rows={2}
-                  required
                   placeholder="https://images.unsplash.com/..., https://..."
                   value={newProduct.images}
                   onChange={(e) => setNewProduct({ ...newProduct, images: e.target.value })}
@@ -1526,10 +1075,9 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <label className="block text-neutral-400 uppercase mb-1">Description *</label>
+                <label className="block text-neutral-400 uppercase mb-1">Description</label>
                 <textarea
                   rows={3}
-                  required
                   placeholder="Streetwear drop detailed narrative..."
                   value={newProduct.description}
                   onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
@@ -1550,7 +1098,7 @@ export default function AdminDashboardPage() {
                   disabled={createLoading}
                   className="flex items-center gap-2 px-6 py-2 bg-[#E50914] hover:bg-[#B80710] text-white font-bold rounded-sm disabled:opacity-50"
                 >
-                  {createLoading && <Loader2 size={14} className="animate-spin" />} Save & Deploy Drop
+                  {createLoading && <Loader2 size={14} className="animate-spin" />} Save & Deploy
                 </button>
               </div>
             </form>
@@ -1574,7 +1122,7 @@ export default function AdminDashboardPage() {
 
             <form onSubmit={handleSaveEdit} className="space-y-4 text-xs font-mono">
               <div>
-                <label className="block text-neutral-400 uppercase mb-1">Product Title *</label>
+                <label className="block text-neutral-400 uppercase mb-1">Product Title</label>
                 <input
                   type="text"
                   required
@@ -1639,7 +1187,7 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <label className="block text-neutral-400 uppercase mb-1">Category *</label>
+                <label className="block text-neutral-400 uppercase mb-1">Category</label>
                 {!isEditCustomCategory ? (
                   <div className="flex gap-2">
                     <select
@@ -1657,11 +1205,11 @@ export default function AdminDashboardPage() {
                       <option value="women">WOMEN</option>
                       <option value="kids">KIDS</option>
                       {categories.map((c) => (
-                        <option key={c.id || c.slug} value={c.slug || c.id}>
-                          {(c.name || c.slug).toUpperCase()}
+                        <option key={c._id || c.name} value={c.name}>
+                          {c.name.toUpperCase()}
                         </option>
                       ))}
-                      <option value="__custom__" className="text-[#E50914] font-bold">+ Custom Category...</option>
+                      <option value="__custom__">+ Custom Category...</option>
                     </select>
                   </div>
                 ) : (
@@ -1685,10 +1233,9 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <label className="block text-neutral-400 uppercase mb-1">Image URLs (comma-separated) *</label>
+                <label className="block text-neutral-400 uppercase mb-1">Image URLs (comma-separated)</label>
                 <textarea
                   rows={2}
-                  required
                   value={editForm.images}
                   onChange={(e) => setEditForm({ ...editForm, images: e.target.value })}
                   className="w-full bg-[#121212] border border-neutral-700 p-2.5 text-white rounded-sm outline-none focus:border-[#E50914]"
@@ -1696,10 +1243,9 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <label className="block text-neutral-400 uppercase mb-1">Description *</label>
+                <label className="block text-neutral-400 uppercase mb-1">Description</label>
                 <textarea
                   rows={3}
-                  required
                   value={editForm.description}
                   onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                   className="w-full bg-[#121212] border border-neutral-700 p-2.5 text-white rounded-sm outline-none focus:border-[#E50914]"
@@ -1719,7 +1265,7 @@ export default function AdminDashboardPage() {
                   disabled={editLoading}
                   className="flex items-center gap-2 px-6 py-2 bg-[#E50914] hover:bg-[#B80710] text-white font-bold rounded-sm disabled:opacity-50"
                 >
-                  {editLoading && <Loader2 size={14} className="animate-spin" />} Update Drop Item
+                  {editLoading && <Loader2 size={14} className="animate-spin" />} Update Drop
                 </button>
               </div>
             </form>

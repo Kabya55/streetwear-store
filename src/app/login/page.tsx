@@ -102,9 +102,16 @@ function LoginContent() {
           <button
             type="submit"
             disabled={loading}
-
+            className="w-full py-4 bg-[#ff6b00]/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_6px_20px_rgba(255,107,0,0.35)] disabled:bg-neutral-800 !text-white text-white font-bold uppercase tracking-wider text-xs rounded-full hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(255,107,0,0.5)] active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
+            style={{ color: '#ffffff' }}
           >
-
+            {loading ? (
+              <Loader2 className="animate-spin text-white" size={16} />
+            ) : (
+              <>
+                Sign In & Enter Vault <ArrowRight size={16} className="text-white" />
+              </>
+            )}
           </button>
         </form>
 

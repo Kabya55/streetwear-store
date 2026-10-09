@@ -214,6 +214,10 @@ export default function Navbar() {
                           <span className="inline-block px-2 py-0.5 bg-[#ff6b00]/15 border border-[#ff6b00]/30 text-[#ff6b00] text-[10px] font-bold font-mono tracking-wider uppercase rounded-sm">
                             ★ Store Administrator
                           </span>
+                        ) : user.role === 'editor' ? (
+                          <span className="inline-block px-2 py-0.5 bg-blue-500/15 border border-blue-500/30 text-blue-400 text-[10px] font-bold font-mono tracking-wider uppercase rounded-sm">
+                            ✏️ Catalog Editor
+                          </span>
                         ) : (
                           <span className="inline-block px-2 py-0.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 text-[10px] font-mono uppercase rounded-sm">
                             Vault Member
@@ -231,7 +235,21 @@ export default function Navbar() {
                           className="flex items-center gap-2.5 w-full px-4 py-2.5 bg-[#ff6b00]/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45)] !text-white text-white text-xs font-bold font-mono uppercase tracking-wider rounded-full hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 transition-all duration-200"
                           style={{ color: '#ffffff' }}
                         >
-                          <LayoutDashboard size={15} className="text-white" /> Dashboard Console
+                          <LayoutDashboard size={15} className="text-white" /> Admin Console
+                        </Link>
+                      </div>
+                    )}
+
+                    {/* Editor Dashboard Button (Only if user is Editor) */}
+                    {user.role === 'editor' && (
+                      <div className="p-1.5 border-b border-neutral-200 dark:border-neutral-800">
+                        <Link
+                          href="/editor/dashboard"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 w-full px-4 py-2.5 bg-blue-600/90 backdrop-blur-md border border-white/30 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45)] !text-white text-white text-xs font-bold font-mono uppercase tracking-wider rounded-full hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 transition-all duration-200"
+                          style={{ color: '#ffffff' }}
+                        >
+                          <LayoutDashboard size={15} className="text-white" /> Editor Console
                         </Link>
                       </div>
                     )}
