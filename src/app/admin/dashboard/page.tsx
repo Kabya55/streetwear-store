@@ -42,6 +42,8 @@ export default function AdminDashboardPage() {
     totalOrders: 0,
     deliveredOrders: 0,
     pendingOrders: 0,
+    totalPaid: 0,
+    totalPendingAmount: 0,
   });
 
   // Orders, Users, Products Lists
@@ -53,6 +55,11 @@ export default function AdminDashboardPage() {
   const [orderSearch, setOrderSearch] = useState('');
   const [orderPage, setOrderPage] = useState<number>(1);
   const [ordersPerPage, setOrdersPerPage] = useState<number>(5);
+
+  // Search & Users Pagination state
+  const [userSearch, setUserSearch] = useState('');
+  const [userPage, setUserPage] = useState<number>(1);
+  const [usersPerPage, setUsersPerPage] = useState<number>(5);
 
   // Delivery Charge State (Saved to MongoDB)
   const [deliveryCharge, setDeliveryCharge] = useState<number>(120);
@@ -114,10 +121,15 @@ export default function AdminDashboardPage() {
     }
   }, [user, authLoading, router]);
 
-  // Reset pagination when search query or page size changes
+  // Reset order pagination when search query or page size changes
   useEffect(() => {
     setOrderPage(1);
   }, [orderSearch, ordersPerPage]);
+
+  // Reset user pagination when search query or page size changes
+  useEffect(() => {
+    setUserPage(1);
+  }, [userSearch, usersPerPage]);
 
   const fetchAdminData = async (rangeOverride?: 'weekly' | 'monthly' | 'yearly' | 'total') => {
     if (!user || user.role !== 'admin') return;
@@ -212,6 +224,59 @@ export default function AdminDashboardPage() {
       }
     } catch (err) {
       alert('Error updating delivery status');
+    }
+  };
+
+  // Update order payment status (Paid / Pending)
+  const handlePaymentStatusChange = async (orderId: string, newStatus: string) => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('miralou_token') : null;
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${apiUrl}/admin/orders/${orderId}/payment`, {
+        method: 'PATCH',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify({ paymentStatus: newStatus }),
+      });
+      if (res.ok) {
+        setOrders((prev) =>
+          prev.map((o) => (o._id === orderId ? { ...o, paymentStatus: newStatus } : o))
+        );
+        fetchAdminData();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.message || 'Could not update payment status');
+      }
+    } catch (err) {
+      alert('Error updating payment status');
+    }
+  };
+
+  // Update a user's role (admin / editor / user)
+  const handleUpdateUserRole = async (userId: string, newRole: string) => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('miralou_token') : null;
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${apiUrl}/admin/users/${userId}/role`, {
+        method: 'PATCH',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify({ role: newRole }),
+      });
+      if (res.ok) {
+        setUsers((prev) =>
+          prev.map((u) => (u._id === userId ? { ...u, role: newRole } : u))
+        );
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.message || 'Could not update user role');
+      }
+    } catch (err) {
+      alert('Error updating user role');
     }
   };
 
@@ -541,8 +606,8 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* 5 Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 relative">
+        {/* 7 Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 relative">
           {statsLoading && (
             <div className="absolute inset-0 bg-[#121212]/60 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-sm">
               <Loader2 className="animate-spin text-[#E50914]" size={26} />
@@ -574,10 +639,28 @@ export default function AdminDashboardPage() {
               val: stats.pendingOrders,
               icon: <Clock className="text-amber-500" size={20} />,
             },
+            {
+              label: 'TOTAL PAID (৳)',
+              val: `৳ ${(stats.totalPaid || 0).toLocaleString()}`,
+              icon: <CheckCircle className="text-green-400" size={20} />,
+              highlight: 'emerald',
+            },
+            {
+              label: 'TOTAL PENDING (৳)',
+              val: `৳ ${(stats.totalPendingAmount || 0).toLocaleString()}`,
+              icon: <Clock className="text-orange-400" size={20} />,
+              highlight: 'orange',
+            },
           ].map((card, i) => (
             <div
               key={i}
-              className="bg-[#181818] border border-neutral-800 p-5 rounded-sm flex items-center justify-between"
+              className={`bg-[#181818] border p-5 rounded-sm flex items-center justify-between ${
+                (card as any).highlight === 'emerald'
+                  ? 'border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.08)]'
+                  : (card as any).highlight === 'orange'
+                  ? 'border-orange-500/40 shadow-[0_0_12px_rgba(249,115,22,0.08)]'
+                  : 'border-neutral-800'
+              }`}
             >
               <div>
                 <p className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">
@@ -680,15 +763,38 @@ export default function AdminDashboardPage() {
                       </td>
                       <td className="p-4 font-bold text-white">৳ {o.totalAmount?.toLocaleString()}</td>
                       <td className="p-4">
-                        <span
-                          className={`px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase ${
-                            o.paymentStatus === 'Paid'
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                              : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                          }`}
-                        >
-                          {o.paymentStatus}
-                        </span>
+                        {o.deliveryStatus === 'Cancelled' ? (
+                          <span className="px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase text-center bg-neutral-700/40 text-neutral-400 border border-neutral-600/40">
+                            Cancelled
+                          </span>
+                        ) : (
+                          <div className="flex flex-col gap-1.5">
+                            <span
+                              className={`px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase text-center ${
+                                o.paymentStatus === 'Paid'
+                                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                  : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                              }`}
+                            >
+                              {o.paymentStatus}
+                            </span>
+                            <button
+                              onClick={() =>
+                                handlePaymentStatusChange(
+                                  o._id,
+                                  o.paymentStatus === 'Paid' ? 'Pending' : 'Paid'
+                                )
+                              }
+                              className={`px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider transition ${
+                                o.paymentStatus === 'Paid'
+                                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
+                                  : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25'
+                              }`}
+                            >
+                              → Mark {o.paymentStatus === 'Paid' ? 'Pending' : 'Paid'}
+                            </button>
+                          </div>
+                        )}
                       </td>
                       <td className="p-4">
                         <select
@@ -808,44 +914,212 @@ export default function AdminDashboardPage() {
       )}
 
       {/* 4. USER MANAGEMENT TABLE */}
-      {activeTab === 'users' && (
-        <div className="bg-[#181818] border border-neutral-800 rounded-sm overflow-x-auto">
-          <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-[#121212] text-neutral-400 uppercase border-b border-neutral-800">
-              <tr>
-                <th className="p-4">User Name</th>
-                <th className="p-4">Email Address</th>
-                <th className="p-4">Security Role</th>
-                <th className="p-4">Orders Placed</th>
-                <th className="p-4">Member Since</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-800">
-              {users.map((u) => (
-                <tr key={u._id} className="hover:bg-neutral-900/60 transition">
-                  <td className="p-4 font-bold text-white font-sans">{u.name}</td>
-                  <td className="p-4 text-neutral-400">{u.email}</td>
-                  <td className="p-4">
-                    <span
-                      className={`px-2 py-0.5 text-[10px] font-bold uppercase ${
-                        u.role === 'admin'
-                          ? 'bg-[#E50914]/20 text-[#E50914] border border-[#E50914]/40'
-                          : 'bg-neutral-800 text-neutral-300'
-                      }`}
+      {activeTab === 'users' && (() => {
+        const filteredUsers = users.filter(
+          (u) =>
+            u.name?.toLowerCase().includes(userSearch.toLowerCase()) ||
+            u.email?.toLowerCase().includes(userSearch.toLowerCase())
+        );
+        const totalUserPages = Math.ceil(filteredUsers.length / usersPerPage) || 1;
+        const paginatedUsers = filteredUsers.slice(
+          (userPage - 1) * usersPerPage,
+          userPage * usersPerPage
+        );
+        return (
+          <div className="space-y-4">
+            {/* Search Bar */}
+            <div className="flex items-center gap-3 bg-[#181818] border border-neutral-800 p-3 max-w-md">
+              <Search size={16} className="text-neutral-500" />
+              <input
+                type="text"
+                placeholder="Search by Name or Email Address..."
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                className="w-full bg-transparent border-none text-xs text-white outline-none font-mono placeholder:text-neutral-600"
+              />
+              {userSearch && (
+                <button onClick={() => setUserSearch('')} className="text-neutral-500 hover:text-white transition">
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            <div className="bg-[#181818] border border-neutral-800 rounded-sm overflow-x-auto">
+              {/* Table Header Info */}
+              <div className="px-5 py-3.5 border-b border-neutral-800 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider">User Registry</p>
+                  <p className="text-xs font-bold text-white mt-0.5">
+                    {filteredUsers.length} {userSearch ? 'matching' : 'registered'} member{filteredUsers.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+                <span className="text-[10px] font-mono text-neutral-500 bg-[#121212] border border-neutral-800 px-2.5 py-1 rounded-sm">
+                  Role changes save to MongoDB instantly
+                </span>
+              </div>
+
+              <table className="w-full text-left text-xs font-mono">
+                <thead className="bg-[#121212] text-neutral-400 uppercase border-b border-neutral-800">
+                  <tr>
+                    <th className="p-4">User Name</th>
+                    <th className="p-4">Email Address</th>
+                    <th className="p-4">Security Role</th>
+                    <th className="p-4">Change Role</th>
+                    <th className="p-4">Orders Placed</th>
+                    <th className="p-4">Member Since</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-800">
+                  {filteredUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-8 text-center text-neutral-500">
+                        No users match the search query.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedUsers.map((u) => (
+                      <tr key={u._id} className="hover:bg-neutral-900/60 transition">
+                        <td className="p-4 font-bold text-white font-sans">{u.name}</td>
+                        <td className="p-4 text-neutral-400">{u.email}</td>
+                        <td className="p-4">
+                          <span
+                            className={`px-2.5 py-1 text-[10px] font-bold uppercase rounded-sm ${
+                              u.role === 'admin'
+                                ? 'bg-[#E50914]/20 text-[#E50914] border border-[#E50914]/40'
+                                : u.role === 'editor'
+                                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40'
+                                : 'bg-neutral-800 text-neutral-300 border border-neutral-700'
+                            }`}
+                          >
+                            {u.role}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          {u._id === user?._id ? (
+                            <span className="text-[10px] font-mono text-neutral-600 italic">Cannot change own role</span>
+                          ) : (
+                            <select
+                              value={u.role}
+                              onChange={(e) => handleUpdateUserRole(u._id, e.target.value)}
+                              className={`bg-[#121212] border px-3 py-1.5 text-xs font-mono font-bold outline-none cursor-pointer transition rounded-sm ${
+                                u.role === 'admin'
+                                  ? 'border-[#E50914]/50 text-[#E50914] focus:border-[#E50914]'
+                                  : u.role === 'editor'
+                                  ? 'border-blue-500/50 text-blue-400 focus:border-blue-400'
+                                  : 'border-neutral-700 text-neutral-300 focus:border-neutral-500'
+                              }`}
+                            >
+                              <option value="admin">👑 Admin</option>
+                              <option value="editor">✏️ Editor</option>
+                              <option value="user">👤 User</option>
+                            </select>
+                          )}
+                        </td>
+                        <td className="p-4 font-bold text-white">{u.ordersCount || 0} Orders</td>
+                        <td className="p-4 text-neutral-500">
+                          {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+
+              {/* USERS PAGINATION BAR */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3.5 bg-[#121212] border-t border-neutral-800 text-xs font-mono">
+                {/* Left: showing count & page size */}
+                <div className="flex items-center gap-3 text-neutral-400">
+                  <span>
+                    Showing{' '}
+                    <strong className="text-white">
+                      {filteredUsers.length === 0 ? 0 : (userPage - 1) * usersPerPage + 1}
+                    </strong>{' '}
+                    to{' '}
+                    <strong className="text-white">
+                      {Math.min(userPage * usersPerPage, filteredUsers.length)}
+                    </strong>{' '}
+                    of <strong className="text-[#E50914]">{filteredUsers.length}</strong> users
+                  </span>
+                  <span className="text-neutral-600">|</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-neutral-400">Per page:</span>
+                    <select
+                      value={usersPerPage}
+                      onChange={(e) => setUsersPerPage(Number(e.target.value))}
+                      className="bg-[#181818] border border-neutral-700 text-white px-2 py-1 rounded-sm outline-none focus:border-[#E50914] cursor-pointer"
                     >
-                      {u.role}
-                    </span>
-                  </td>
-                  <td className="p-4 font-bold text-white">{u.ordersCount || 0} Orders</td>
-                  <td className="p-4 text-neutral-500">
-                    {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Right: page navigation */}
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setUserPage(1)}
+                    disabled={userPage === 1}
+                    className="px-2.5 py-1.5 bg-[#181818] border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed transition rounded-sm text-[11px] font-bold"
+                  >
+                    « First
+                  </button>
+                  <button
+                    onClick={() => setUserPage((p) => Math.max(p - 1, 1))}
+                    disabled={userPage === 1}
+                    className="px-3 py-1.5 bg-[#181818] border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed transition rounded-sm text-[11px] font-bold flex items-center gap-1"
+                  >
+                    <ChevronLeft size={13} /> Prev
+                  </button>
+
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalUserPages }, (_, i) => i + 1)
+                      .filter(
+                        (p) =>
+                          p === 1 ||
+                          p === totalUserPages ||
+                          Math.abs(p - userPage) <= 1
+                      )
+                      .map((p, idx, arr) => (
+                        <div key={p} className="flex items-center">
+                          {idx > 0 && arr[idx - 1] !== p - 1 && (
+                            <span className="px-1 text-neutral-500">...</span>
+                          )}
+                          <button
+                            onClick={() => setUserPage(p)}
+                            className={`min-w-[28px] h-7 px-1.5 flex items-center justify-center rounded-sm text-[11px] font-bold transition ${
+                              userPage === p
+                                ? 'bg-[#E50914] text-white border border-[#E50914] shadow-sm'
+                                : 'bg-[#181818] border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'
+                            }`}
+                          >
+                            {p}
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+
+                  <button
+                    onClick={() => setUserPage((p) => Math.min(p + 1, totalUserPages))}
+                    disabled={userPage === totalUserPages}
+                    className="px-3 py-1.5 bg-[#181818] border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed transition rounded-sm text-[11px] font-bold flex items-center gap-1"
+                  >
+                    Next <ChevronRight size={13} />
+                  </button>
+                  <button
+                    onClick={() => setUserPage(totalUserPages)}
+                    disabled={userPage === totalUserPages}
+                    className="px-2.5 py-1.5 bg-[#181818] border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed transition rounded-sm text-[11px] font-bold"
+                  >
+                    Last »
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* 5. PRODUCT MANAGEMENT & PUBLISHING */}
       {activeTab === 'products' && (
